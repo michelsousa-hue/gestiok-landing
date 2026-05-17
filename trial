@@ -284,7 +284,7 @@
     const now = new Date();
     const data = now.toLocaleDateString('pt-PT') + ' às ' + now.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
 
-    emailjs.send('service_8d19fmo', 'template_j1gt23h', {
+    emailjs.send('service_8d19fmo', 'template_scgh2mp', {
       clube_nome:       clube,
       responsavel_nome: nome,
       responsavel_email: email,
