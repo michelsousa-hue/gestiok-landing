@@ -136,6 +136,46 @@
     .feature-name { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--text); margin-bottom:8px; }
     .feature-desc { font-size:0.88rem; color:var(--text-muted); line-height:1.65; }
 
+    /* LIVE STATS */
+    .livestats-section { padding:0 0 100px; background:var(--bg); }
+    .livestats-box { background:var(--green-pale); border:1.5px solid var(--green-border); border-radius:20px; padding:56px 48px; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+    .livestats-badge { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:#fff; border:1px solid var(--green-border); border-radius:999px; font-size:0.78rem; font-weight:700; color:var(--green); margin-bottom:20px; }
+    .live-dot { width:8px; height:8px; background:#ef4444; border-radius:50%; animation:blink 1s ease infinite; }
+    .livestats-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1.6rem,3vw,2.3rem); letter-spacing:-0.03em; color:var(--text); line-height:1.1; margin-bottom:16px; }
+    .livestats-desc { font-size:0.95rem; color:var(--text-muted); line-height:1.7; margin-bottom:24px; }
+    .livestats-list { list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
+    .livestats-list li { display:flex; align-items:flex-start; gap:10px; font-size:0.88rem; color:var(--text-muted); }
+    .ls-check { color:var(--green); font-weight:700; flex-shrink:0; }
+
+    .livestats-right { display:flex; flex-direction:column; gap:14px; }
+    .ls-scoreboard { background:#fff; border:1px solid var(--green-border); border-radius:14px; padding:20px 24px; }
+    .ls-match-info { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .ls-label { font-size:0.72rem; font-weight:700; color:#ef4444; text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:6px; }
+    .ls-label::before { content:''; width:6px; height:6px; background:#ef4444; border-radius:50%; animation:blink 1s ease infinite; }
+    .ls-time { font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; color:var(--text); }
+    .ls-score-row { display:flex; align-items:center; justify-content:space-between; }
+    .ls-team { text-align:center; }
+    .ls-team-name { font-size:0.78rem; color:var(--text-muted); margin-bottom:6px; }
+    .ls-score { font-family:'Syne',sans-serif; font-weight:800; font-size:2.8rem; color:var(--text); line-height:1; }
+    .ls-vs { font-size:1.2rem; color:var(--text-dim); }
+
+    .ls-stats-grid { background:#fff; border:1px solid var(--green-border); border-radius:14px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .ls-stat-row { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; }
+    .ls-stat-label { font-size:0.72rem; color:var(--text-dim); text-align:center; white-space:nowrap; font-weight:600; }
+    .ls-stat-bar-wrap { height:6px; background:var(--bg3); border-radius:999px; overflow:hidden; }
+    .ls-stat-bar { height:100%; border-radius:999px; transition:width 1s ease; }
+    .ls-stat-bar.home { background:var(--green); margin-left:auto; }
+    .ls-stat-bar.away { background:#94a3b8; }
+
+    .ls-events { background:#fff; border:1px solid var(--green-border); border-radius:14px; padding:14px 20px; display:flex; flex-direction:column; gap:10px; }
+    .ls-event { display:flex; align-items:center; gap:10px; font-size:0.82rem; }
+    .ls-event.new-event { animation:fadeUp 0.5s ease both; }
+    .ls-event-time { font-weight:700; color:var(--green); min-width:28px; }
+    .ls-event-icon { font-size:0.9rem; }
+    .ls-event-text { color:var(--text-muted); }
+
+    @keyframes timerTick { from{opacity:1} 50%{opacity:0.6} to{opacity:1} }
+
     /* DEMO */
     .demo-section { padding:0 0 100px; background:var(--bg); }
     .demo-box { background:var(--bg2); border:1px solid var(--border); border-radius:20px; padding:56px 48px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; }
@@ -210,6 +250,7 @@
       .features-grid{grid-template-columns:repeat(2,1fr)}
       .pricing-grid{grid-template-columns:1fr;max-width:400px}
       .demo-box{grid-template-columns:1fr}
+      .livestats-box{grid-template-columns:1fr}
     }
     @media(max-width:640px){
       nav{padding:14px 20px}
@@ -233,7 +274,7 @@
     <li><a href="#demo">Demo</a></li>
     <li><a href="#precos">Preços</a></li>
   </ul>
-  <a href="#experimentar" class="btn btn-primary">Experimentar grátis</a>
+  <a href="/trial.html" class="btn btn-primary">Experimentar grátis</a>
 </nav>
 
 <section class="hero">
@@ -242,7 +283,7 @@
     <h1>Gere o teu plantel.<br />Foca-te no <span class="accent">jogo.</span></h1>
     <p class="hero-sub">Tudo o que precisas para gerir jogadores, documentos e inscrições no teu clube de hóquei em patins — num só lugar, sem complicações.</p>
     <div class="hero-cta">
-      <a href="#experimentar" class="btn btn-primary btn-lg">
+      <a href="/trial.html" class="btn btn-primary btn-lg">
         Começar trial grátis
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -349,6 +390,64 @@
   </div>
 </section>
 
+<!-- LIVE STATS -->
+<section class="livestats-section">
+  <div class="container">
+    <div class="livestats-box fade-in">
+      <div class="livestats-left">
+        <div class="livestats-badge">
+          <span class="live-dot"></span>
+          Ao vivo
+        </div>
+        <h2 class="livestats-title">Estatísticas do jogo,<br />em tempo real</h2>
+        <p class="livestats-desc">A funcionalidade que nos distingue. Regista e acompanha os dados estatísticos dos jogos ao vivo — golos, assistências, faltas, tempo de jogo e muito mais. Informação instantânea para treinadores e dirigentes, a partir de qualquer dispositivo.</p>
+        <ul class="livestats-list">
+          <li><span class="ls-check">✓</span> Registo de eventos em tempo real durante o jogo</li>
+          <li><span class="ls-check">✓</span> Estatísticas individuais e colectivas por jogo e época</li>
+          <li><span class="ls-check">✓</span> Acessível de qualquer dispositivo — telemóvel, tablet ou PC</li>
+          <li><span class="ls-check">✓</span> Histórico completo para análise de desempenho</li>
+        </ul>
+        <a href="/trial.html" class="btn btn-primary btn-lg" style="margin-top:8px;">Experimentar grátis</a>
+      </div>
+      <div class="livestats-right">
+        <div class="ls-scoreboard">
+          <div class="ls-match-info">
+            <span class="ls-label">Em curso</span>
+            <span class="ls-time" id="ls-timer">34:22</span>
+          </div>
+          <div class="ls-score-row">
+            <div class="ls-team"><div class="ls-team-name">ADB Campo</div><div class="ls-score" id="ls-score-home">3</div></div>
+            <div class="ls-vs">—</div>
+            <div class="ls-team"><div class="ls-team-name">CP Monção</div><div class="ls-score" id="ls-score-away">2</div></div>
+          </div>
+        </div>
+        <div class="ls-stats-grid">
+          <div class="ls-stat-row">
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar home" style="width:68%"></div></div>
+            <div class="ls-stat-label">Posse</div>
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar away" style="width:32%"></div></div>
+          </div>
+          <div class="ls-stat-row">
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar home" style="width:55%"></div></div>
+            <div class="ls-stat-label">Remates</div>
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar away" style="width:40%"></div></div>
+          </div>
+          <div class="ls-stat-row">
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar home" style="width:30%"></div></div>
+            <div class="ls-stat-label">Faltas</div>
+            <div class="ls-stat-bar-wrap"><div class="ls-stat-bar away" style="width:50%"></div></div>
+          </div>
+        </div>
+        <div class="ls-events">
+          <div class="ls-event new-event"><span class="ls-event-time">34'</span><span class="ls-event-icon">⚽</span><span class="ls-event-text">Golo — Rui Santos</span></div>
+          <div class="ls-event"><span class="ls-event-time">28'</span><span class="ls-event-icon">🟨</span><span class="ls-event-text">Falta — Miguel Costa</span></div>
+          <div class="ls-event"><span class="ls-event-time">21'</span><span class="ls-event-icon">⚽</span><span class="ls-event-text">Golo — João Ferreira</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- DEMO -->
 <section class="demo-section" id="demo">
   <div class="container">
@@ -362,7 +461,7 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
             Ver no YouTube
           </a>
-          <a href="#experimentar" class="btn btn-outline">Experimentar grátis</a>
+          <a href="/trial.html" class="btn btn-outline">Experimentar grátis</a>
         </div>
       </div>
       <div class="demo-preview" onclick="document.getElementById('yt-link').click()">
@@ -396,7 +495,7 @@
           <li><span class="check">✓</span> Dashboard completo</li>
           <li><span class="x">—</span> <span style="color:var(--text-dim)">Sem cartão de crédito</span></li>
         </ul>
-        <a href="#experimentar" class="btn btn-outline" style="width:100%;justify-content:center;">Começar grátis</a>
+        <a href="/trial.html" class="btn btn-outline" style="width:100%;justify-content:center;">Começar grátis</a>
       </div>
 
       <div class="plan-card featured">
@@ -412,7 +511,7 @@
           <li><span class="check">✓</span> Actualizações contínuas</li>
           <li><span class="check">✓</span> Dados ilimitados</li>
         </ul>
-        <a href="#experimentar" class="btn btn-primary" style="width:100%;justify-content:center;">Escolher mensal</a>
+        <a href="/trial.html" class="btn btn-primary" style="width:100%;justify-content:center;">Escolher mensal</a>
       </div>
 
       <div class="plan-card">
@@ -427,7 +526,7 @@
           <li><span class="check">✓</span> Acesso garantido toda a época</li>
           <li><span class="check">✓</span> Suporte directo via WhatsApp</li>
         </ul>
-        <a href="#experimentar" class="btn btn-outline" style="width:100%;justify-content:center;">Escolher anual</a>
+        <a href="/trial.html" class="btn btn-outline" style="width:100%;justify-content:center;">Escolher anual</a>
       </div>
     </div>
   </div>
@@ -460,18 +559,11 @@
     <div class="cta-box fade-in">
       <h2 class="cta-title">Pronto para experimentar?</h2>
       <p class="cta-desc">30 dias grátis. Sem cartão de crédito. Sem complicações.<br />O teu clube em funcionamento em menos de 24 horas.</p>
-      <div id="form-wrap">
-        <div class="trial-form">
-          <input type="text" id="club-name" placeholder="Nome do clube" autocomplete="organization" />
-          <input type="email" id="club-email" placeholder="Email de contacto" autocomplete="email" />
-          <button class="btn btn-primary btn-lg" onclick="submitForm()">
-            Pedir acesso
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <p class="form-note">Respondemos em menos de 24 horas para configurar o acesso do vosso clube.</p>
-      </div>
-      <div class="success-msg" id="success-msg">✓ Pedido recebido! Entraremos em contacto em breve para configurar o acesso do vosso clube.</div>
+      <a href="/trial.html" class="btn btn-primary btn-lg" style="margin:0 auto;display:inline-flex;">
+        Pedir acesso gratuito
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <p class="form-note" style="margin-top:14px;">Respondemos em menos de 24 horas para configurar o acesso do vosso clube.</p>
     </div>
   </div>
 </section>
@@ -490,6 +582,16 @@
 </footer>
 
 <script>
+  // Timer ao vivo animado
+  let secs = 34 * 60 + 22;
+  setInterval(() => {
+    secs++;
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    const el = document.getElementById('ls-timer');
+    if (el) el.textContent = m + ':' + String(s).padStart(2, '0');
+  }, 1000);
+
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.1 });
