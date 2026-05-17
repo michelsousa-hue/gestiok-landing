@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experimentar Grátis — GestiOK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #16a34a;
+      --green-light: #22c55e;
+      --green-pale: #f0fdf4;
+      --green-mid: #dcfce7;
+      --green-border: #bbf7d0;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 48px rgba(0,0,0,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+    .header-logo span { color: var(--green); }
+    .header-back { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .header-back:hover { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(180deg, var(--green-pale) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--green-border);
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px; background: var(--green-mid); border: 1px solid var(--green-border);
+      border-radius: 999px; font-size: 0.78rem; font-weight: 600; color: var(--green);
+      margin-bottom: 18px;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; animation: blink 2s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -0.03em; color: var(--text); margin-bottom: 12px; }
+    .hero h1 span { color: var(--green); }
+    .hero-sub { font-size: 1rem; color: var(--text-muted); font-weight: 300; max-width: 440px; margin: 0 auto; line-height: 1.7; }
+
+    /* CONTAINER */
+    .container { max-width: 580px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* CARD */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 0.72rem; font-weight: 700; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 18px;
+    }
+
+    /* FORM */
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    label .req { color: #ef4444; }
+
+    input, select, textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: var(--text);
+      background: var(--white); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-dim); }
+    select { cursor: pointer; }
+    textarea { resize: vertical; }
+
+    /* REQUIRED NOTE */
+    .required-note { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 20px; }
+
+    /* ERROR */
+    .error-msg { font-size: 0.78rem; color: #ef4444; margin-top: 5px; display: none; }
+
+    /* SUBMIT */
+    .btn-submit {
+      width: 100%; padding: 15px;
+      background: var(--green); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,163,74,0.25); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* SUCCESS */
+    .success-box {
+      display: none;
+      background: var(--green-pale);
+      border: 1.5px solid var(--green-border);
+      border-radius: 20px;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .success-icon { font-size: 3rem; margin-bottom: 16px; }
+    .success-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--text); margin-bottom: 12px; }
+    .success-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; }
+    .success-note { margin-top: 16px; font-size: 0.8rem; color: var(--text-dim); }
+
+    /* FEATURES STRIP */
+    .features-strip {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 32px;
+    }
+    .feature-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 999px;
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+    .feature-pill .icon { color: var(--green); }
+
+    @media(max-width:480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .hero { padding: 36px 20px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/" class="header-logo">Gesti<span>OK</span></a>
+  <a href="/" class="header-back">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Voltar ao site
+  </a>
+</div>
+
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span> 30 dias grátis · Sem cartão de crédito</div>
+  <h1>Experimenta a <span>GestiOK</span><br />no teu clube</h1>
+  <p class="hero-sub">Preenche o formulário e entramos em contacto em menos de 24 horas para configurar o acesso do teu clube.</p>
+</div>
+
+<div class="container">
+
+  <div class="features-strip">
+    <div class="feature-pill"><span class="icon">✓</span> Gestão de plantel</div>
+    <div class="feature-pill"><span class="icon">✓</span> Estatísticas ao vivo</div>
+    <div class="feature-pill"><span class="icon">✓</span> Avaliação técnica</div>
+    <div class="feature-pill"><span class="icon">✓</span> Geração de PDFs</div>
+  </div>
+
+  <div id="form-container">
+    <p class="required-note">* Campos obrigatórios</p>
+
+    <div class="card">
+      <div class="card-title">Dados do Clube</div>
+      <div class="form-group">
+        <label>Nome do clube <span class="req">*</span></label>
+        <input type="text" id="f-clube" placeholder="ex: Associação Desportiva de ..." />
+      </div>
+      <div class="form-group">
+        <label>Distrito / Região</label>
+        <input type="text" id="f-distrito" placeholder="ex: Viana do Castelo" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Responsável</div>
+      <div class="form-group">
+        <label>Nome do responsável <span class="req">*</span></label>
+        <input type="text" id="f-nome" placeholder="Nome completo" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="f-email" placeholder="email@clube.pt" />
+        </div>
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="tel" id="f-telefone" placeholder="9XX XXX XXX" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sobre o Clube</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nº aproximado de jogadores</label>
+          <select id="f-jogadores">
+            <option value="">— Seleccionar —</option>
+            <option value="Menos de 20">Menos de 20</option>
+            <option value="20 a 50">20 a 50</option>
+            <option value="50 a 100">50 a 100</option>
+            <option value="Mais de 100">Mais de 100</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Escalões</label>
+          <select id="f-escaloes">
+            <option value="">— Seleccionar —</option>
+            <option value="Só Sénior">Só Sénior</option>
+            <option value="Formação e Sénior">Formação e Sénior</option>
+            <option value="Só Formação">Só Formação</option>
+            <option value="Todos os escalões">Todos os escalões</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observações</label>
+        <textarea id="f-obs" rows="3" placeholder="Alguma informação adicional que queiras partilhar..."></textarea>
+      </div>
+    </div>
+
+    <p id="error-global" class="error-msg" style="font-size:0.85rem;margin-bottom:12px;"></p>
+    <button class="btn-submit" id="btn-submeter" onclick="submeterTrial()">
+      🚀 Pedir acesso gratuito
+    </button>
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Pedido recebido!</div>
+    <p class="success-desc">
+      Obrigado pelo interesse na GestiOK!<br />
+      Entraremos em contacto em menos de 24 horas<br />
+      para configurar o acesso do vosso clube.
+    </p>
+    <p class="success-note">Podes fechar esta página.</p>
+  </div>
+
+</div>
+
+<script>
+  emailjs.init('p1SEK5W8Wk-bNoOdpgBhX');
+
+  function submeterTrial() {
+    const clube = document.getElementById('f-clube').value.trim();
+    const nome  = document.getElementById('f-nome').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const errEl = document.getElementById('error-global');
+    errEl.style.display = 'none';
+
+    if (!clube) { errEl.textContent = 'O nome do clube é obrigatório.'; errEl.style.display = 'block'; return; }
+    if (!nome)  { errEl.textContent = 'O nome do responsável é obrigatório.'; errEl.style.display = 'block'; return; }
+    if (!email) { errEl.textContent = 'O email é obrigatório.'; errEl.style.display = 'block'; return; }
+    if (!email.includes('@')) { errEl.textContent = 'Por favor introduz um email válido.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('btn-submeter');
+    btn.disabled = true;
+    btn.textContent = 'A enviar...';
+
+    const now = new Date();
+    const data = now.toLocaleDateString('pt-PT') + ' às ' + now.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'});
+
+    emailjs.send('service_8d19fmo', 'template_j1gt23h', {
+      clube_nome:       clube,
+      responsavel_nome: nome,
+      responsavel_email: email,
+      telefone:         document.getElementById('f-telefone').value.trim() || '—',
+      num_jogadores:    document.getElementById('f-jogadores').value || '—',
+      escaloes:         document.getElementById('f-escaloes').value || '—',
+      obs:              document.getElementById('f-obs').value.trim() || '—',
+      data:             data,
+    })
+    .then(() => {
+      document.getElementById('form-container').style.display = 'none';
+      document.getElementById('success-box').style.display = 'block';
+    })
+    .catch((err) => {
+      errEl.textContent = 'Erro ao enviar. Tenta novamente ou contacta-nos directamente.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '🚀 Pedir acesso gratuito';
+      console.error('EmailJS error:', err);
+    });
+  }
+
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('keypress', e => { if (e.key === 'Enter' && el.tagName !== 'TEXTAREA') submeterTrial(); });
+  });
+</script>
+</body>
+</html>
