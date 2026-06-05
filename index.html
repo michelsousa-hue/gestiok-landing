@@ -136,6 +136,53 @@
     .feature-name { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--text); margin-bottom:8px; }
     .feature-desc { font-size:0.88rem; color:var(--text-muted); line-height:1.65; }
 
+    /* GALLERY */
+    .gallery-section { padding: 0 0 100px; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .gallery-header { max-width: 560px; margin-bottom: 36px; padding-top: 100px; }
+    .gallery-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+    .gtab {
+      padding: 8px 18px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--bg);
+      font-family: "DM Sans", sans-serif; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .gtab:hover { border-color: var(--green-border); color: var(--green); background: var(--green-pale); }
+    .gtab.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+
+    .gallery-device { display: flex; justify-content: center; }
+    .device-wrap { width: 100%; max-width: 900px; }
+    .device-frame {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .device-bar {
+      background: var(--bg3); padding: 11px 16px;
+      display: flex; align-items: center; gap: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .device-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .device-dot:nth-child(1){background:#ff5f57} .device-dot:nth-child(2){background:#febc2e} .device-dot:nth-child(3){background:#28c840}
+    .device-url {
+      margin-left: 10px; background: #fff; border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 14px; font-size: 0.73rem; color: var(--text-dim);
+    }
+    .device-screen { width: 100%; overflow: hidden; max-height: 520px; }
+    .device-screen img {
+      width: 100%; display: block;
+      transition: opacity 0.3s ease;
+      object-fit: cover; object-position: top;
+    }
+    .device-screen img.fading { opacity: 0; }
+    .device-caption {
+      margin-top: 16px; text-align: center;
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;
+      min-height: 48px;
+    }
+    .device-caption strong { color: var(--text); }
+
     /* LIVE STATS */
     .livestats-section { padding:0 0 100px; background:var(--bg); }
     .livestats-box { background:var(--green-pale); border:1.5px solid var(--green-border); border-radius:20px; padding:56px 48px; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
@@ -271,7 +318,6 @@
   <a href="#" class="nav-logo">Gesti<span class="ok">OK</span></a>
   <ul class="nav-links">
     <li><a href="#funcionalidades">Funcionalidades</a></li>
-    <li><a href="#demo">Demo</a></li>
     <li><a href="#precos">Preços</a></li>
   </ul>
   <a href="/trial.html" class="btn btn-primary">Experimentar grátis</a>
@@ -390,6 +436,45 @@
   </div>
 </section>
 
+<!-- GALLERY -->
+<section class="gallery-section">
+  <div class="container">
+    <div class="gallery-header fade-in">
+      <div class="section-label">App em acção</div>
+      <h2 class="section-title">Vê a plataforma por dentro</h2>
+      <p class="section-desc">Clica em cada funcionalidade para ver como funciona na prática.</p>
+    </div>
+
+    <div class="gallery-tabs fade-in">
+      <button class="gtab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+      <button class="gtab" onclick="showTab('jogadores')">👥 Jogadores</button>
+      <button class="gtab" onclick="showTab('presencas')">✅ Presenças</button>
+      <button class="gtab" onclick="showTab('sessoes')">📅 Sessões</button>
+      <button class="gtab" onclick="showTab('jogo')">⚡ Jogo ao Vivo</button>
+      <button class="gtab" onclick="showTab('ficha')">📋 Ficha Individual</button>
+      <button class="gtab" onclick="showTab('socios')">🏅 Sócios</button>
+      <button class="gtab" onclick="showTab('evolucao')">📈 Evolução</button>
+    </div>
+
+    <div class="gallery-device fade-in">
+      <div class="device-wrap">
+        <div class="device-frame">
+          <div class="device-bar">
+            <div class="device-dot"></div><div class="device-dot"></div><div class="device-dot"></div>
+            <div class="device-url">gestiok.com.pt</div>
+          </div>
+          <div class="device-screen">
+            <img id="gallery-img" src="/images/dashboard.jpg" alt="Dashboard GestiOK" />
+          </div>
+        </div>
+        <div class="device-caption" id="gallery-caption">
+          <strong>Dashboard</strong> — Visão geral do clube com taxa de presenças, sessões e alertas em tempo real.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- LIVE STATS -->
 <section class="livestats-section">
   <div class="container">
@@ -448,31 +533,6 @@
   </div>
 </section>
 
-<!-- DEMO -->
-<section class="demo-section" id="demo">
-  <div class="container">
-    <div class="demo-box fade-in">
-      <div class="demo-text">
-        <div class="section-label">Demonstração</div>
-        <h2 class="section-title">Vê a plataforma em acção</h2>
-        <p class="demo-desc">Em menos de 2 minutos percebes como gerir o plantel completo do teu clube — desde o registo de jogadores até à exportação de documentação oficial.</p>
-        <div class="demo-cta">
-          <a href="https://youtube.com" target="_blank" rel="noopener" class="btn btn-primary" id="yt-link">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
-            Ver no YouTube
-          </a>
-          <a href="/trial.html" class="btn btn-outline">Experimentar grátis</a>
-        </div>
-      </div>
-      <div class="demo-preview" onclick="document.getElementById('yt-link').click()">
-        <div class="play-btn">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M8 5.5l9 5.5-9 5.5V5.5z" fill="white"/></svg>
-        </div>
-        <div class="demo-preview-label">Demonstração da plataforma</div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- PRICING -->
 <section class="pricing" id="precos">
@@ -582,6 +642,32 @@
 </footer>
 
 <script>
+  // Gallery tabs
+  const tabData = {
+    dashboard: { img: '/images/dashboard.jpg', caption: '<strong>Dashboard</strong> — Visão geral do clube com taxa de presenças, sessões e alertas em tempo real.' },
+    jogadores: { img: '/images/jogadores.jpg', caption: '<strong>Jogadores</strong> — Lista completa do plantel por escalão, com avaliação, posição e presenças.' },
+    presencas: { img: '/images/presencas.jpg', caption: '<strong>Presenças</strong> — Registo rápido por sessão com estados: Presente, Falta c/ aviso, Falta s/ aviso e Lesão.' },
+    sessoes: { img: '/images/sessoes.jpg', caption: '<strong>Sessões</strong> — Histórico de treinos e jogos com estado de registo de presenças.' },
+    jogo: { img: '/images/jogo-ao-vivo.jpg', caption: '<strong>Jogo ao Vivo</strong> — Marcador em tempo real com histórico completo de jogos e exportação PDF.' },
+    ficha: { img: '/images/ficha-individual.jpg', caption: '<strong>Ficha Individual</strong> — Estatísticas detalhadas por jogador: presenças, qualidade de treino e comparação com o grupo.' },
+    socios: { img: '/images/socios.jpg', caption: '<strong>Gestão de Sócios</strong> — Controlo de quotas, pagamentos e estado de cada associado do clube.' },
+    evolucao: { img: '/images/evolucao-presencas.jpg', caption: '<strong>Evolução de Presenças</strong> — Gráfico mensal, comparação com a média do grupo e histórico completo por atleta.' },
+  };
+
+  function showTab(key) {
+    const img = document.getElementById('gallery-img');
+    const caption = document.getElementById('gallery-caption');
+    img.classList.add('fading');
+    setTimeout(() => {
+      img.src = tabData[key].img;
+      img.alt = key;
+      caption.innerHTML = tabData[key].caption;
+      img.classList.remove('fading');
+    }, 250);
+    document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
   // Timer ao vivo animado
   let secs = 34 * 60 + 22;
   setInterval(() => {
