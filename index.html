@@ -432,6 +432,11 @@
         <div class="feature-name">Avaliação Técnica</div>
         <p class="feature-desc">Cria fichas de avaliação personalizadas para cada escalão — com pré e pós teste, análise SWOT individual e de grupo. Cada clube define os seus próprios objectivos e critérios de avaliação.</p>
       </div>
+      <div class="feature-card" style="border-color:var(--green-border);background:var(--green-pale);">
+        <div class="feature-icon">✏️</div>
+        <div class="feature-name">Editor de Exercícios</div>
+        <p class="feature-desc">Cria e guarda exercícios no campo real de hóquei em patins. Biblioteca filtrável por escalão e categoria. Gera planos de treino completos e exporta em PDF com um clique.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -454,6 +459,9 @@
       <button class="gtab" onclick="showTab('ficha')">📋 Ficha Individual</button>
       <button class="gtab" onclick="showTab('socios')">🏅 Sócios</button>
       <button class="gtab" onclick="showTab('evolucao')">📈 Evolução</button>
+      <button class="gtab" onclick="showTab('biblioteca')">📚 Biblioteca</button>
+      <button class="gtab" onclick="showTab('editor')">✏️ Editor</button>
+      <button class="gtab" onclick="showTab('planos')">📋 Planos de Treino</button>
     </div>
 
     <div class="gallery-device fade-in">
@@ -561,7 +569,7 @@
       <div class="plan-card featured">
         <div class="plan-badge">Mais popular</div>
         <div class="plan-name">Mensal</div>
-        <div class="plan-price"><span class="currency">€</span><span class="amount">15</span><span class="period">/mês</span></div>
+        <div class="plan-price"><span class="currency">€</span><span class="amount">20</span><span class="period">/mês</span></div>
         <div class="plan-desc">Acesso total sem surpresas. Cancela quando quiseres.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
@@ -576,9 +584,9 @@
 
       <div class="plan-card">
         <div class="plan-name">Anual</div>
-        <div class="plan-price"><span class="currency">€</span><span class="amount">120</span><span class="period">/ano</span></div>
+        <div class="plan-price"><span class="currency">€</span><span class="amount">180</span><span class="period">/ano</span></div>
         <div class="plan-desc">O melhor valor para quem quer gerir a época toda sem preocupações.</div>
-        <div class="plan-saving">Poupa 60€ · equivale a 2 meses grátis</div>
+        <div class="plan-saving">Poupa 60€ · equivale a 3 meses grátis</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li><span class="check">✓</span> Tudo do Mensal</li>
@@ -652,6 +660,9 @@
     ficha: { img: '/images/ficha-individual.jpg', caption: '<strong>Ficha Individual</strong> — Estatísticas detalhadas por jogador: presenças, qualidade de treino e comparação com o grupo.' },
     socios: { img: '/images/socios.jpg', caption: '<strong>Gestão de Sócios</strong> — Controlo de quotas, pagamentos e estado de cada associado do clube.' },
     evolucao: { img: '/images/evolucao-presencas.jpg', caption: '<strong>Evolução de Presenças</strong> — Gráfico mensal, comparação com a média do grupo e histórico completo por atleta.' },
+    biblioteca: { img: '/images/biblioteca.jpeg.webp', caption: '<strong>Biblioteca de Exercícios</strong> — Todos os exercícios desenhados num só lugar, filtráveis por escalão e categoria.' },
+    editor: { img: '/images/editor.jpg.webp', caption: '<strong>Editor de Exercícios</strong> — Cria exercícios no campo real de hóquei em patins com jogadores, movimentos, balizas e equipamento.' },
+    planos: { img: '/images/planos.jpg.webp', caption: '<strong>Planos de Treino</strong> — Cria planos completos seleccionando exercícios da biblioteca. Exporta em PDF com um clique.' },
   };
 
   function showTab(key) {
