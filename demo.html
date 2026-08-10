@@ -416,29 +416,117 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = e => {
-      const lines = e.target.result.split('\n').filter(l => l.trim());
-      const header = lines[0].toLowerCase().split(',').map(h => h.trim());
-      const nomeIdx = header.findIndex(h => h.includes('nome'));
-      const posIdx = header.findIndex(h => h.includes('pos'));
-      const escIdx = header.findIndex(h => h.includes('esc') || h.includes('cat'));
+      const raw = e.target.result;
+      const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
+
+      // Detectar formato: assiduidade (datas nas colunas) ou simples (nome,posicao,escalao)
+      const firstLine = lines[0].toLowerCase();
+      const isAssiduidade = firstLine.includes('/') || firstLine.includes('out') || firstLine.includes('jan') || firstLine.includes('fev');
+
       players = [];
-      lines.slice(1).forEach((line, i) => {
-        const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
-        const nome = nomeIdx >= 0 ? cols[nomeIdx] : cols[0];
-        if (!nome) return;
-        players.push({
-          id: i + Date.now(),
-          nome,
-          posicao: posIdx >= 0 ? cols[posIdx] : 'Avançado',
-          escalao: escIdx >= 0 ? cols[escIdx] : 'Sénior',
-          presencas: 0, sessoes: 0
+      sessions = [];
+
+      if (isAssiduidade) {
+        // Formato assiduidade: primeira coluna=nome, restantes=datas ou estatísticas
+        const header = lines[0].split(',');
+        
+        // Encontrar colunas de estatísticas no final
+        const totalPresIdx = header.findIndex(h => h.toLowerCase().includes('total pres'));
+        const totalTreIdx = header.findIndex(h => h.toLowerCase().includes('total tre'));
+        const pctIdx = header.findIndex(h => h.toLowerCase().includes('%'));
+
+        // Linhas de dados (ignorar linhas de totais no final)
+        const skipWords = ['presenças','falta','total','média','lesão','ausência'];
+        const dataLines = lines.slice(1).filter(l => {
+          const first = l.split(',')[0].toLowerCase().trim();
+          return first && !skipWords.some(w => first.includes(w));
         });
-      });
-      const drop = document.getElementById('csv-drop');
-      drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text"><strong>${players.length} jogadores importados!</strong></div>`;
-      showToast(`${players.length} jogadores importados com sucesso!`);
+
+        // Extrair datas válidas (colunas com formato data ou mês abreviado)
+        const dateCols = [];
+        header.forEach((h, i) => {
+          if (i === 0) return;
+          const clean = h.trim();
+          if (clean.match(/\d{1,2}\/\d{2}/) || clean.match(/\d{2}-\w+/) || clean.match(/jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i)) {
+            dateCols.push({ idx: i, date: clean });
+          }
+        });
+
+        // Construir sessões a partir das datas
+        const sessionMap = {};
+        dateCols.forEach(dc => { sessionMap[dc.idx] = { date: dc.date, presencas: {} }; });
+
+        dataLines.forEach((line, pi) => {
+          const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
+          const nome = cols[0];
+          if (!nome) return;
+
+          let presTotal = 0, treTotal = 0, pct = 0;
+
+          // Usar colunas de estatísticas se disponíveis
+          if (totalPresIdx > 0 && cols[totalPresIdx]) presTotal = parseInt(cols[totalPresIdx]) || 0;
+          if (totalTreIdx > 0 && cols[totalTreIdx]) treTotal = parseInt(cols[totalTreIdx]) || 0;
+          if (pctIdx > 0 && cols[pctIdx]) {
+            pct = parseFloat(cols[pctIdx].replace(',','.').replace('%','')) || 0;
+          } else if (treTotal > 0) {
+            pct = Math.round(presTotal / treTotal * 100);
+          }
+
+          // Se não tiver colunas de stats, contar manualmente
+          if (!presTotal && !treTotal) {
+            dateCols.forEach(dc => {
+              const val = (cols[dc.idx] || '').toLowerCase().trim();
+              if (val && val !== '') treTotal++;
+              if (val === 'p') presTotal++;
+            });
+            pct = treTotal > 0 ? Math.round(presTotal/treTotal*100) : 0;
+          }
+
+          const id = pi + Date.now();
+          players.push({ id, nome, posicao: 'Avançado', escalao: 'Sénior', presencas: presTotal, sessoes: treTotal });
+
+          // Registar nas sessões
+          dateCols.forEach(dc => {
+            const val = (cols[dc.idx] || '').toLowerCase().trim();
+            if (val) sessionMap[dc.idx].presencas[id] = val.startsWith('p') ? 'P' : val === 'fca' ? 'FCA' : val === 'fsa' || val === 'fcsa' ? 'FSA' : val === 'l' ? 'FSA' : null;
+          });
+        });
+
+        // Converter sessionMap em sessions
+        Object.values(sessionMap).forEach(s => {
+          if (Object.values(s.presencas).some(v => v)) {
+            sessions.push({ date: s.date, presencas: s.presencas });
+          }
+        });
+
+        const drop = document.getElementById('csv-drop');
+        drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text"><strong>${players.length} jogadores importados!</strong><br/><span style="font-size:0.8rem;color:var(--text-dim)">${sessions.length} sessões carregadas da época</span></div>`;
+        showToast(`${players.length} jogadores e ${sessions.length} sessões importados!`);
+
+      } else {
+        // Formato simples: nome, posicao, escalao
+        const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+        const nomeIdx = header.findIndex(h => h.includes('nome'));
+        const posIdx = header.findIndex(h => h.includes('pos'));
+        const escIdx = header.findIndex(h => h.includes('esc') || h.includes('cat'));
+        lines.slice(1).forEach((line, i) => {
+          const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
+          const nome = nomeIdx >= 0 ? cols[nomeIdx] : cols[0];
+          if (!nome) return;
+          players.push({
+            id: i + Date.now(),
+            nome,
+            posicao: posIdx >= 0 ? cols[posIdx] : 'Avançado',
+            escalao: escIdx >= 0 ? cols[escIdx] : 'Sénior',
+            presencas: 0, sessoes: 0
+          });
+        });
+        const drop = document.getElementById('csv-drop');
+        drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text"><strong>${players.length} jogadores importados!</strong></div>`;
+        showToast(`${players.length} jogadores importados com sucesso!`);
+      }
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
   }
 
   function startDemo() {
