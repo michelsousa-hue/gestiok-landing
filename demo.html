@@ -449,8 +449,12 @@
 
       if (isAssiduidade) {
         // Encontrar índices das colunas de estatísticas
-        const totalPresIdx = header.findIndex(h => h.toLowerCase().includes('total pres'));
-        const totalTreIdx  = header.findIndex(h => h.toLowerCase().includes('total tre'));
+        // Normalizar texto para comparação (remove acentos e espaços extra)
+        function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+        const totalPresIdx = header.findIndex(h => norm(h).includes('total pres'));
+        const totalTreIdx  = header.findIndex(h => norm(h).includes('total tre'));
+        console.log('totalPresIdx:', totalPresIdx, 'totalTreIdx:', totalTreIdx);
+        console.log('Header normalizado:', header.map(norm));
 
         // Identificar colunas de datas
         const dateCols = header.map((h, i) => ({ i, h })).filter(({i, h}) =>
