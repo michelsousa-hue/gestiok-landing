@@ -1161,9 +1161,11 @@
 
   function abrirModal(tipo, equipa) {
     modalIsSub = false;
+    modalTipo = tipo;
+    modalEquipa = equipa;
+    console.log('abrirModal:', tipo, equipa); // debug
     document.getElementById('modal-normal').style.display = 'block';
     document.getElementById('modal-sub-area').style.display = 'none';
-    modalTipo = tipo; modalEquipa = equipa;
     const icons = { golo:'⚽', falta:'⚠️', amarelo:'🟨', azul:'🟦', vermelho:'🟥' };
     const labels = { golo:'Quem marcou?', falta:'Quem fez falta?', amarelo:'Quem levou amarelo?', azul:'Quem levou azul?', vermelho:'Quem levou vermelho?' };
     document.getElementById('modal-title').textContent = icons[tipo] + ' ' + (labels[tipo] || 'Seleccionar jogador');
@@ -1188,13 +1190,15 @@
       const entraSel = document.getElementById('modal-entra');
       const saiNome = saiSel.options[saiSel.selectedIndex]?.text || '?';
       const entraNome = entraSel.options[entraSel.selectedIndex]?.text || '?';
+      const t = modalTipo, eq = modalEquipa;
       fecharModal();
-      addEvento('substituicao', 'home', null, saiNome, entraNome);
+      addEvento('substituicao', eq || 'home', null, saiNome, entraNome);
     } else {
       const sel = document.getElementById('modal-jogador');
       const jogadorNome = sel.options[sel.selectedIndex]?.text?.split(' (')[0] || null;
+      const t = modalTipo, eq = modalEquipa;
       fecharModal();
-      addEvento(modalTipo || 'golo', modalEquipa || 'home', jogadorNome);
+      addEvento(t || 'golo', eq || 'home', jogadorNome);
     }
   }
 
