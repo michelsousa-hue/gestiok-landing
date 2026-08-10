@@ -170,6 +170,44 @@
     .cta-strip-text h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
     .cta-strip-text p { font-size: 0.82rem; color: var(--text-muted); }
 
+    /* JOGO AO VIVO */
+    .jogo-layout { display: flex; flex-direction: column; gap: 16px; }
+    .scoreboard-main {
+      background: #0f172a; border-radius: 16px; padding: 32px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; margin-bottom: 4px;
+    }
+    .score-team { text-align: center; flex: 1; }
+    .score-team-name { font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .score-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 4rem; color: #ffffff; line-height: 1; }
+    .score-center { text-align: center; }
+    .score-status { font-size: 0.72rem; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .score-timer { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: #ffffff; letter-spacing: 0.05em; }
+    .score-parte { font-size: 0.78rem; color: #64748b; margin-top: 4px; }
+    .jogo-eventos-btns { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; transition: opacity 0.3s; }
+    .evento-group { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .evento-group-title { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); margin-bottom: 4px; }
+    .evt-btn { padding: 9px 12px; border-radius: var(--radius-sm); border: none; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .evt-home { background: var(--green-mid); color: var(--green); }
+    .evt-home:hover { background: var(--green); color: #fff; }
+    .evt-away { background: #fee2e2; color: var(--red); }
+    .evt-away:hover { background: var(--red); color: #fff; }
+    .evt-neutral { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+    .evt-neutral:hover { background: var(--bg3); }
+    .evt-yellow { background: #fef3c7; color: #d97706; }
+    .evt-yellow:hover { background: #d97706; color: #fff; }
+    .evt-red { background: #fee2e2; color: var(--red); }
+    .evt-red:hover { background: var(--red); color: #fff; }
+    .jogo-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .feed-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 0.83rem; animation: fadeUp 0.3s ease; }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-time { font-weight: 700; color: var(--green); min-width: 36px; }
+    .feed-icon { font-size: 1rem; }
+    .feed-text { color: var(--text-muted); }
+    .stat-compare { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .stat-compare-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; min-width: 28px; text-align: center; }
+    .stat-compare-label { flex: 1; text-align: center; font-size: 0.78rem; color: var(--text-dim); }
+
     /* FICHA INDIVIDUAL */
     .ficha-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
     .ficha-stat { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
@@ -299,6 +337,11 @@
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>
         Presenças
       </button>
+      <div class="sidebar-section">Jogo</div>
+      <button class="nav-item" onclick="showPage('jogo', this); initJogo()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        Jogo ao Vivo
+      </button>
       <div class="sidebar-section">Análise</div>
       <button class="nav-item" onclick="showPage('ficha', this); renderFicha()">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h4"/></svg>
@@ -385,6 +428,76 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
             Guardar sessão
           </button>
+        </div>
+      </div>
+
+      <!-- JOGO AO VIVO -->
+      <div class="page" id="page-jogo">
+        <div class="jogo-layout">
+
+          <!-- Configuração -->
+          <div id="jogo-setup-bar" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+            <input id="jogo-adversario" type="text" placeholder="Nome do adversário" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);outline:none;min-width:200px;" />
+            <select id="jogo-escalao" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);outline:none;">
+              <option>Sénior</option><option>Sub-20</option><option>Sub-17</option><option>Sub-15</option><option>Sub-13</option><option>Sub-11</option><option>Sub-9</option>
+            </select>
+            <button class="btn btn-primary" id="btn-iniciar" onclick="iniciarJogo()">▶ Iniciar</button>
+            <button class="btn btn-outline" onclick="resetJogo()" style="color:var(--red);border-color:var(--red);">↺ Reset</button>
+          </div>
+
+          <!-- Marcador -->
+          <div class="scoreboard-main">
+            <div class="score-team">
+              <div class="score-team-name" id="score-home-name">O Meu Clube</div>
+              <div class="score-num" id="score-home">0</div>
+            </div>
+            <div class="score-center">
+              <div class="score-status" id="score-status">Pronto para iniciar</div>
+              <div class="score-timer" id="score-timer">00:00</div>
+              <div class="score-parte" id="score-parte">Parte 1</div>
+            </div>
+            <div class="score-team">
+              <div class="score-team-name" id="score-away-name">Adversário</div>
+              <div class="score-num" id="score-away">0</div>
+            </div>
+          </div>
+
+          <!-- Botões de evento -->
+          <div class="jogo-eventos-btns" id="jogo-btns" style="opacity:0.4;pointer-events:none;">
+            <div class="evento-group">
+              <div class="evento-group-title">⚽ Golos</div>
+              <button class="evt-btn evt-home" onclick="addEvento('golo','home')">Golo Casa</button>
+              <button class="evt-btn evt-away" onclick="addEvento('golo','away')">Golo Fora</button>
+            </div>
+            <div class="evento-group">
+              <div class="evento-group-title">⚠️ Faltas</div>
+              <button class="evt-btn evt-neutral" onclick="addEvento('falta','home')">Falta Casa</button>
+              <button class="evt-btn evt-neutral" onclick="addEvento('falta','away')">Falta Fora</button>
+            </div>
+            <div class="evento-group">
+              <div class="evento-group-title">🟨 Cartões</div>
+              <button class="evt-btn evt-yellow" onclick="addEvento('amarelo','home')">Amarelo Casa</button>
+              <button class="evt-btn evt-yellow" onclick="addEvento('amarelo','away')">Amarelo Fora</button>
+            </div>
+            <div class="evento-group">
+              <div class="evento-group-title">🟥 Vermelho</div>
+              <button class="evt-btn evt-red" onclick="addEvento('vermelho','home')">Vermelho Casa</button>
+              <button class="evt-btn evt-red" onclick="addEvento('vermelho','away')">Vermelho Fora</button>
+            </div>
+          </div>
+
+          <!-- Stats + Feed -->
+          <div class="jogo-bottom">
+            <div class="dash-card" style="flex:1;">
+              <div class="dash-card-title">📊 Estatísticas</div>
+              <div id="jogo-stats"></div>
+            </div>
+            <div class="dash-card" style="flex:1;max-height:320px;overflow-y:auto;">
+              <div class="dash-card-title">📋 Feed de eventos</div>
+              <div id="jogo-feed"><div style="color:var(--text-dim);font-size:0.85rem;">Aguarda início do jogo...</div></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -729,6 +842,135 @@
     renderJogadores(activeEscalao);
     renderPresencas(activePresencaEscalao);
     showToast('✅ Sessão guardada com sucesso!');
+  }
+
+  // JOGO AO VIVO
+  let jogoTimer = null;
+  let jogoSeconds = 0;
+  let jogoRunning = false;
+  let jogoHomeGoals = 0;
+  let jogoAwayGoals = 0;
+  let jogoHomeFaltas = 0;
+  let jogoAwayFaltas = 0;
+  let jogoEvents = [];
+  let jogoParte = 1;
+  let clubeName = 'O Meu Clube';
+
+  function initJogo() {
+    clubeName = document.getElementById('sidebar-club').textContent.replace('✓','').trim() || 'O Meu Clube';
+    document.getElementById('score-home-name').textContent = clubeName;
+    renderJogoStats();
+  }
+
+  function iniciarJogo() {
+    if (jogoRunning) {
+      // Pausar
+      clearInterval(jogoTimer);
+      jogoRunning = false;
+      document.getElementById('btn-iniciar').textContent = '▶ Continuar';
+      document.getElementById('score-status').textContent = 'Pausado';
+    } else {
+      const adv = document.getElementById('jogo-adversario').value.trim() || 'Adversário';
+      document.getElementById('score-away-name').textContent = adv;
+      document.getElementById('score-home-name').textContent = clubeName;
+      jogoRunning = true;
+      document.getElementById('btn-iniciar').textContent = '⏸ Pausar';
+      document.getElementById('score-status').textContent = '● Em curso';
+      document.getElementById('score-status').style.color = '#ef4444';
+      document.getElementById('jogo-btns').style.opacity = '1';
+      document.getElementById('jogo-btns').style.pointerEvents = 'auto';
+      jogoTimer = setInterval(() => {
+        jogoSeconds++;
+        const m = Math.floor(jogoSeconds / 60);
+        const s = jogoSeconds % 60;
+        document.getElementById('score-timer').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        // Meio tempo aos 25 minutos
+        if (jogoSeconds === 25 * 60 && jogoParte === 1) {
+          jogoParte = 2;
+          document.getElementById('score-parte').textContent = 'Parte 2';
+          addEvento('parte', null);
+        }
+      }, 1000);
+    }
+  }
+
+  function resetJogo() {
+    clearInterval(jogoTimer);
+    jogoRunning = false;
+    jogoSeconds = 0;
+    jogoHomeGoals = 0;
+    jogoAwayGoals = 0;
+    jogoHomeFaltas = 0;
+    jogoAwayFaltas = 0;
+    jogoEvents = [];
+    jogoParte = 1;
+    document.getElementById('score-home').textContent = '0';
+    document.getElementById('score-away').textContent = '0';
+    document.getElementById('score-timer').textContent = '00:00';
+    document.getElementById('score-status').textContent = 'Pronto para iniciar';
+    document.getElementById('score-parte').textContent = 'Parte 1';
+    document.getElementById('btn-iniciar').textContent = '▶ Iniciar';
+    document.getElementById('jogo-btns').style.opacity = '0.4';
+    document.getElementById('jogo-btns').style.pointerEvents = 'none';
+    document.getElementById('jogo-feed').innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Aguarda início do jogo...</div>';
+    renderJogoStats();
+  }
+
+  function addEvento(tipo, equipa) {
+    const m = Math.floor(jogoSeconds / 60);
+    const s = jogoSeconds % 60;
+    const tempoStr = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+    let icon = '', text = '', animate = true;
+
+    if (tipo === 'golo') {
+      if (equipa === 'home') { jogoHomeGoals++; document.getElementById('score-home').textContent = jogoHomeGoals; icon = '⚽'; text = `Golo — ${document.getElementById('score-home-name').textContent}`; }
+      else { jogoAwayGoals++; document.getElementById('score-away').textContent = jogoAwayGoals; icon = '⚽'; text = `Golo — ${document.getElementById('score-away-name').textContent}`; }
+      // Animação no marcador
+      const el = document.getElementById(equipa === 'home' ? 'score-home' : 'score-away');
+      el.style.color = '#22c55e'; setTimeout(() => el.style.color = '#ffffff', 1000);
+    } else if (tipo === 'falta') {
+      if (equipa === 'home') jogoHomeFaltas++; else jogoAwayFaltas++;
+      icon = '⚠️'; text = `Falta — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+    } else if (tipo === 'amarelo') {
+      icon = '🟨'; text = `Cartão amarelo — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+    } else if (tipo === 'vermelho') {
+      icon = '🟥'; text = `Cartão vermelho — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+    } else if (tipo === 'parte') {
+      icon = '🔔'; text = 'Início da 2ª Parte'; animate = false;
+    }
+
+    jogoEvents.unshift({ tempo: tempoStr, icon, text });
+
+    const feed = document.getElementById('jogo-feed');
+    feed.innerHTML = jogoEvents.map(e => `
+      <div class="feed-item">
+        <div class="feed-time">${e.tempo}</div>
+        <div class="feed-icon">${e.icon}</div>
+        <div class="feed-text">${e.text}</div>
+      </div>
+    `).join('');
+
+    renderJogoStats();
+  }
+
+  function renderJogoStats() {
+    document.getElementById('jogo-stats').innerHTML = `
+      <div class="stat-compare" style="margin-bottom:16px;">
+        <div class="stat-compare-val" style="color:var(--green)">${jogoHomeGoals}</div>
+        <div class="stat-compare-label">Golos</div>
+        <div class="stat-compare-val" style="color:var(--red)">${jogoAwayGoals}</div>
+      </div>
+      <div class="stat-compare">
+        <div class="stat-compare-val">${jogoHomeFaltas}</div>
+        <div class="stat-compare-label">Faltas</div>
+        <div class="stat-compare-val">${jogoAwayFaltas}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:0.75rem;color:var(--text-dim);">
+        <span style="color:var(--green);font-weight:700;">${document.getElementById('score-home-name')?.textContent||'Casa'}</span>
+        <span style="color:var(--red);font-weight:700;">${document.getElementById('score-away-name')?.textContent||'Fora'}</span>
+      </div>
+    `;
   }
 
   // FICHA INDIVIDUAL
