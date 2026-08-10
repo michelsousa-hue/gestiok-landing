@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo GestiOK — Experimenta sem registo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a; --green-light: #22c55e; --green-pale: #f0fdf4;
+      --green-mid: #dcfce7; --green-border: #bbf7d0;
+      --bg: #f8fafc; --white: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-muted: #475569; --text-dim: #94a3b8;
+      --radius: 14px; --radius-sm: 8px;
+      --shadow: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 48px rgba(0,0,0,0.10);
+      --red: #ef4444; --amber: #f59e0b;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header { background: var(--white); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .header-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+    .header-logo span { color: var(--green); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .demo-badge { padding: 4px 12px; background: var(--green-mid); border: 1px solid var(--green-border); border-radius: 999px; font-size: 0.72rem; font-weight: 700; color: var(--green); }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 20px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(22,163,74,0.3); }
+    .btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    /* SETUP SCREEN */
+    #screen-setup { min-height: calc(100vh - 57px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+    .setup-box { width: 100%; max-width: 620px; }
+    .setup-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -0.03em; color: var(--text); margin-bottom: 10px; }
+    .setup-title span { color: var(--green); }
+    .setup-sub { font-size: 1rem; color: var(--text-muted); margin-bottom: 36px; font-weight: 300; line-height: 1.7; }
+
+    .setup-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+    .setup-option {
+      background: var(--white); border: 2px solid var(--border); border-radius: var(--radius);
+      padding: 28px 24px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .setup-option:hover { border-color: var(--green); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .setup-option.selected { border-color: var(--green); background: var(--green-pale); }
+    .setup-option-icon { font-size: 2rem; margin-bottom: 12px; }
+    .setup-option-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--text); margin-bottom: 6px; }
+    .setup-option-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* CSV UPLOAD */
+    .csv-area { display: none; }
+    .csv-area.visible { display: block; }
+    .csv-drop {
+      border: 2px dashed var(--green-border); border-radius: var(--radius);
+      background: var(--green-pale); padding: 40px 24px; text-align: center;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 14px;
+    }
+    .csv-drop:hover { border-color: var(--green); background: var(--green-mid); }
+    .csv-drop-icon { font-size: 2rem; margin-bottom: 10px; }
+    .csv-drop-text { font-size: 0.9rem; color: var(--text-muted); }
+    .csv-drop-text strong { color: var(--green); cursor: pointer; }
+    .csv-template { font-size: 0.78rem; color: var(--text-dim); text-align: center; }
+    .csv-template a { color: var(--green); cursor: pointer; }
+
+    /* MANUAL FORM */
+    .manual-area { display: none; }
+    .manual-area.visible { display: block; }
+    .manual-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .manual-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--text); }
+    .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 280px; overflow-y: auto; }
+    .player-row { display: grid; grid-template-columns: 1fr 140px 120px 36px; gap: 8px; align-items: center; }
+    .player-row input, .player-row select {
+      background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      padding: 8px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    .player-row input:focus, .player-row select:focus { border-color: var(--green); }
+    .remove-btn { width: 32px; height: 32px; border: none; background: #fee2e2; color: var(--red); border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .remove-btn:hover { background: #fecaca; }
+    .add-player-btn { width: 100%; padding: 9px; border: 1.5px dashed var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .add-player-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+
+    .setup-clube { margin-bottom: 20px; }
+    .setup-clube label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .setup-clube input { width: 100%; background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+    .setup-clube input:focus { border-color: var(--green); }
+
+    /* APP SCREEN */
+    #screen-app { display: none; }
+    .app-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 57px); }
+
+    /* SIDEBAR */
+    .sidebar { background: var(--white); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-club { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.95rem; color: var(--text); padding: 0 8px; margin-bottom: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-club span { color: var(--green); }
+    .sidebar-section { font-size: 0.65rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin: 14px 0 6px; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
+    .nav-item:hover { background: var(--bg); color: var(--text); }
+    .nav-item.active { background: var(--green-mid); color: var(--green); font-weight: 600; }
+    .nav-item svg { flex-shrink: 0; }
+
+    /* MAIN */
+    .main { padding: 28px; overflow-y: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* DASHBOARD */
+    .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+    .page-sub { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 24px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+    .stat-label { font-size: 0.68rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: var(--text); line-height: 1; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.red { color: var(--red); }
+
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .dash-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .dash-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* PRESENCE BAR */
+    .presence-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .presence-name { font-size: 0.82rem; color: var(--text); min-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .presence-bar-wrap { flex: 1; height: 8px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+    .presence-bar { height: 100%; border-radius: 999px; transition: width 1s ease; }
+    .presence-pct { font-size: 0.75rem; font-weight: 700; min-width: 36px; text-align: right; }
+
+    /* ESCALAO PILLS */
+    .escalao-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .escalao-pill { padding: 4px 12px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--white); font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+    .escalao-pill.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* TABLE */
+    .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.68rem; font-weight: 700; color: var(--text-dim); padding: 10px 14px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; background: var(--bg); }
+    td { padding: 11px 14px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid var(--bg); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--green-pale); }
+    .td-name { color: var(--text); font-weight: 500; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+    .badge-green { background: var(--green-mid); color: var(--green); }
+    .badge-amber { background: #fef3c7; color: #d97706; }
+    .badge-red { background: #fee2e2; color: var(--red); }
+
+    /* PRESENCAS PAGE */
+    .presenca-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg); }
+    .presenca-row:last-child { border-bottom: none; }
+    .presenca-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+    .presenca-sub { font-size: 0.75rem; color: var(--text-dim); }
+    .presenca-btns { display: flex; gap: 6px; }
+    .pbtn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+    .pbtn.p { border-color: var(--green); background: var(--green-mid); color: var(--green); }
+    .pbtn.fca { border-color: var(--amber); background: #fef3c7; color: #d97706; }
+    .pbtn.fsa { border-color: var(--red); background: #fee2e2; color: var(--red); }
+    .save-bar { position: sticky; bottom: 0; background: var(--white); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; margin: 0 -28px -28px; }
+    .save-bar-text { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* CTA STRIP */
+    .cta-strip { background: linear-gradient(135deg, var(--green-pale) 0%, #fff 100%); border: 1.5px solid var(--green-border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .cta-strip-text h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
+    .cta-strip-text p { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media(max-width:768px) {
+      .app-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .dash-grid { grid-template-columns: 1fr; }
+      .setup-options { grid-template-columns: 1fr; }
+      .player-row { grid-template-columns: 1fr 100px 36px; }
+      .player-row select:first-of-type { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="header-logo">Gesti<span>OK</span></a>
+  <div class="header-right">
+    <span class="demo-badge">🧪 Modo Demo</span>
+    <a href="/trial.html" class="btn btn-primary btn-sm">Pedir trial completo</a>
+  </div>
+</header>
+
+<!-- SETUP -->
+<div id="screen-setup">
+  <div class="setup-box">
+    <h1 class="setup-title">Experimenta a <span>GestiOK</span><br />sem registo</h1>
+    <p class="setup-sub">Os dados ficam só no teu browser e apagam-se quando fechares a página. Nenhum dado é enviado para qualquer servidor.</p>
+
+    <div class="setup-clube">
+      <label>Nome do clube</label>
+      <input type="text" id="input-clube" placeholder="ex: Associação Desportiva de ..." />
+    </div>
+
+    <div class="setup-options">
+      <div class="setup-option" id="opt-csv" onclick="selectOption('csv')">
+        <div class="setup-option-icon">📂</div>
+        <div class="setup-option-title">Carregar CSV</div>
+        <div class="setup-option-desc">Tens uma lista de jogadores em Excel ou CSV? Importa em 30 segundos.</div>
+      </div>
+      <div class="setup-option" id="opt-manual" onclick="selectOption('manual')">
+        <div class="setup-option-icon">✏️</div>
+        <div class="setup-option-title">Adicionar manualmente</div>
+        <div class="setup-option-desc">Adiciona os jogadores um a um. Rápido e simples.</div>
+      </div>
+    </div>
+
+    <!-- CSV -->
+    <div class="csv-area" id="csv-area">
+      <div class="csv-drop" id="csv-drop" onclick="document.getElementById('csv-input').click()">
+        <div class="csv-drop-icon">📁</div>
+        <div class="csv-drop-text">Clica para seleccionar o ficheiro CSV<br /><strong>ou arrasta aqui</strong></div>
+        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this)" />
+      </div>
+      <div class="csv-template">
+        Não tens CSV? <a onclick="downloadTemplate()">Descarrega o template aqui</a>
+      </div>
+    </div>
+
+    <!-- MANUAL -->
+    <div class="manual-area" id="manual-area">
+      <div class="manual-header">
+        <div class="manual-title">Jogadores</div>
+      </div>
+      <div class="players-list" id="players-list"></div>
+      <button class="add-player-btn" onclick="addPlayerRow()">+ Adicionar jogador</button>
+    </div>
+
+    <div style="margin-top:24px;">
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;" onclick="startDemo()">
+        Entrar na demo
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p style="text-align:center;margin-top:10px;font-size:0.75rem;color:var(--text-dim);">🔒 Nenhum dado é guardado em servidores. Tudo apaga ao fechar o browser.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-club" id="sidebar-club">Gesti<span>OK</span></div>
+      <div class="sidebar-section">Principal</div>
+      <button class="nav-item active" onclick="showPage('dashboard', this)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" onclick="showPage('jogadores', this)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Jogadores
+      </button>
+      <button class="nav-item" onclick="showPage('presencas', this)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>
+        Presenças
+      </button>
+    </div>
+
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="cta-strip">
+          <div class="cta-strip-text">
+            <h3>Estás na versão demo 🧪</h3>
+            <p>Os dados apagam quando fechares o browser. No trial completo tens tudo guardado em segurança.</p>
+          </div>
+          <a href="/trial.html" class="btn btn-primary">Pedir trial completo</a>
+        </div>
+
+        <div class="page-title" id="dash-clube-title">Dashboard</div>
+        <div class="page-sub" id="dash-date"></div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Jogadores</div>
+            <div class="stat-value green" id="stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Sessões registadas</div>
+            <div class="stat-value" id="stat-sessoes">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Taxa média presença</div>
+            <div class="stat-value amber" id="stat-taxa">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Abaixo da meta</div>
+            <div class="stat-value red" id="stat-abaixo">—</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-title">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-4 3 3 5-6"/></svg>
+              Taxa de presença por jogador
+            </div>
+            <div id="dash-presencas"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+              Plantel por posição
+            </div>
+            <div id="dash-posicoes"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOGADORES -->
+      <div class="page" id="page-jogadores">
+        <div class="page-title">Jogadores</div>
+        <div class="page-sub">Plantel completo do clube</div>
+        <div class="escalao-pills" id="escalao-pills"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Nome</th><th>Posição</th><th>Escalão</th><th>Presenças</th><th>Taxa</th></tr></thead>
+            <tbody id="jogadores-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PRESENÇAS -->
+      <div class="page" id="page-presencas">
+        <div class="page-title">Registar Presenças</div>
+        <div class="page-sub">Sessão de treino</div>
+        <div class="escalao-pills" id="presenca-pills"></div>
+        <div class="dash-card">
+          <div id="presenca-list"></div>
+        </div>
+        <div class="save-bar">
+          <div class="save-bar-text" id="save-bar-text">Marca as presenças e guarda a sessão</div>
+          <button class="btn btn-primary" onclick="guardarPresencas()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l4 4 8-8"/></svg>
+            Guardar sessão
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // STATE
+  let players = [];
+  let sessions = []; // [{date, presencas: {id: 'P'|'FCA'|'FSA'}}]
+  let currentPresencas = {};
+  let activeEscalao = 'todos';
+  let activePresencaEscalao = 'todos';
+  let selectedOption = null;
+
+  // SETUP
+  function selectOption(opt) {
+    selectedOption = opt;
+    document.getElementById('opt-csv').classList.toggle('selected', opt === 'csv');
+    document.getElementById('opt-manual').classList.toggle('selected', opt === 'manual');
+    document.getElementById('csv-area').classList.toggle('visible', opt === 'csv');
+    document.getElementById('manual-area').classList.toggle('visible', opt === 'manual');
+    if (opt === 'manual' && players.length === 0) addPlayerRow();
+  }
+
+  function addPlayerRow(nome='', posicao='', escalao='') {
+    const id = Date.now() + Math.random();
+    players.push({ id, nome, posicao: posicao || 'Avançado', escalao: escalao || 'Sénior', presencas: 0, sessoes: 0 });
+    renderManualList();
+  }
+
+  function renderManualList() {
+    const list = document.getElementById('players-list');
+    list.innerHTML = players.map((p, i) => `
+      <div class="player-row">
+        <input type="text" placeholder="Nome do jogador" value="${p.nome}" oninput="players[${i}].nome=this.value" />
+        <select onchange="players[${i}].posicao=this.value">
+          ${['Avançado','Defesa','Guarda-redes','Médio'].map(pos => `<option${p.posicao===pos?' selected':''}>${pos}</option>`).join('')}
+        </select>
+        <select onchange="players[${i}].escalao=this.value">
+          ${['Sub-9','Sub-11','Sub-13','Sub-15','Sub-17','Sub-20','Sénior'].map(e => `<option${p.escalao===e?' selected':''}>${e}</option>`).join('')}
+        </select>
+        <button class="remove-btn" onclick="removePlayer(${i})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function removePlayer(i) {
+    players.splice(i, 1);
+    renderManualList();
+  }
+
+  function downloadTemplate() {
+    const csv = 'nome,posicao,escalao\nRui Santos,Avançado,Sénior\nMiguel Costa,Guarda-redes,Sub-15\nJoão Ferreira,Defesa,Sub-13';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'template_gestiok.csv'; a.click();
+  }
+
+  function handleCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const lines = e.target.result.split('\n').filter(l => l.trim());
+      const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+      const nomeIdx = header.findIndex(h => h.includes('nome'));
+      const posIdx = header.findIndex(h => h.includes('pos'));
+      const escIdx = header.findIndex(h => h.includes('esc') || h.includes('cat'));
+      players = [];
+      lines.slice(1).forEach((line, i) => {
+        const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
+        const nome = nomeIdx >= 0 ? cols[nomeIdx] : cols[0];
+        if (!nome) return;
+        players.push({
+          id: i + Date.now(),
+          nome,
+          posicao: posIdx >= 0 ? cols[posIdx] : 'Avançado',
+          escalao: escIdx >= 0 ? cols[escIdx] : 'Sénior',
+          presencas: 0, sessoes: 0
+        });
+      });
+      const drop = document.getElementById('csv-drop');
+      drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text"><strong>${players.length} jogadores importados!</strong></div>`;
+      showToast(`${players.length} jogadores importados com sucesso!`);
+    };
+    reader.readAsText(file);
+  }
+
+  function startDemo() {
+    const clube = document.getElementById('input-clube').value.trim() || 'O Meu Clube';
+    if (players.length === 0) {
+      showToast('Adiciona pelo menos um jogador!'); return;
+    }
+    players = players.filter(p => p.nome.trim());
+    if (players.length === 0) {
+      showToast('Preenche o nome de pelo menos um jogador!'); return;
+    }
+    // Init presencas
+    players.forEach(p => { p.presencas = 0; p.sessoes = 0; });
+    currentPresencas = {};
+    players.forEach(p => currentPresencas[p.id] = null);
+    document.getElementById('screen-setup').style.display = 'none';
+    document.getElementById('screen-app').style.display = 'block';
+    document.getElementById('sidebar-club').innerHTML = `${clube.split(' ')[0]}<span style="color:var(--green)"> ✓</span>`;
+    document.getElementById('dash-clube-title').textContent = `Dashboard — ${clube}`;
+    const now = new Date();
+    document.getElementById('dash-date').textContent = now.toLocaleDateString('pt-PT', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    renderDashboard();
+    renderJogadores();
+    renderPresencas();
+  }
+
+  // NAVIGATION
+  function showPage(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // DASHBOARD
+  function renderDashboard() {
+    document.getElementById('stat-total').textContent = players.length;
+    document.getElementById('stat-sessoes').textContent = sessions.length;
+    const taxas = players.map(p => p.sessoes > 0 ? Math.round(p.presencas / p.sessoes * 100) : null).filter(t => t !== null);
+    const media = taxas.length > 0 ? Math.round(taxas.reduce((a,b) => a+b, 0) / taxas.length) : null;
+    document.getElementById('stat-taxa').textContent = media !== null ? media + '%' : '—';
+    const abaixo = taxas.filter(t => t < 75).length;
+    document.getElementById('stat-abaixo').textContent = sessions.length > 0 ? abaixo : '—';
+
+    // Presença bars
+    const sorted = [...players].sort((a,b) => {
+      const ta = a.sessoes > 0 ? a.presencas/a.sessoes : 0;
+      const tb = b.sessoes > 0 ? b.presencas/b.sessoes : 0;
+      return tb - ta;
+    });
+    document.getElementById('dash-presencas').innerHTML = sorted.map(p => {
+      const pct = p.sessoes > 0 ? Math.round(p.presencas/p.sessoes*100) : 0;
+      const color = pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
+      const textColor = pct >= 75 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
+      return `<div class="presence-item">
+        <div class="presence-name">${p.nome}</div>
+        <div class="presence-bar-wrap"><div class="presence-bar" style="width:${sessions.length>0?pct:0}%;background:${color}"></div></div>
+        <div class="presence-pct" style="color:${textColor}">${sessions.length>0?pct+'%':'—'}</div>
+      </div>`;
+    }).join('');
+
+    // Posições
+    const pos = {};
+    players.forEach(p => { pos[p.posicao] = (pos[p.posicao]||0)+1; });
+    document.getElementById('dash-posicoes').innerHTML = Object.entries(pos).map(([p,n]) => `
+      <div class="presence-item">
+        <div class="presence-name">${p}</div>
+        <div class="presence-bar-wrap"><div class="presence-bar" style="width:${Math.round(n/players.length*100)}%;background:var(--green)"></div></div>
+        <div class="presence-pct" style="color:var(--text-muted)">${n}</div>
+      </div>
+    `).join('');
+  }
+
+  // JOGADORES
+  function renderJogadores(escalao = 'todos') {
+    activeEscalao = escalao;
+    const escaloes = [...new Set(players.map(p => p.escalao))];
+    document.getElementById('escalao-pills').innerHTML =
+      ['todos', ...escaloes].map(e => `<div class="escalao-pill${activeEscalao===e?' active':''}" onclick="renderJogadores('${e}')">${e==='todos'?'Todos':e}</div>`).join('');
+    const filtered = escalao === 'todos' ? players : players.filter(p => p.escalao === escalao);
+    document.getElementById('jogadores-tbody').innerHTML = filtered.map((p,i) => {
+      const taxa = p.sessoes > 0 ? Math.round(p.presencas/p.sessoes*100) : null;
+      const badge = taxa === null ? '' : taxa >= 75 ? `<span class="badge badge-green">${taxa}%</span>` : taxa >= 50 ? `<span class="badge badge-amber">${taxa}%</span>` : `<span class="badge badge-red">${taxa}%</span>`;
+      return `<tr><td>${i+1}</td><td class="td-name">${p.nome}</td><td>${p.posicao}</td><td>${p.escalao}</td><td>${p.presencas}/${p.sessoes}</td><td>${badge || '—'}</td></tr>`;
+    }).join('');
+  }
+
+  // PRESENÇAS
+  function renderPresencas(escalao = 'todos') {
+    activePresencaEscalao = escalao;
+    const escaloes = [...new Set(players.map(p => p.escalao))];
+    document.getElementById('presenca-pills').innerHTML =
+      ['todos', ...escaloes].map(e => `<div class="escalao-pill${activePresencaEscalao===e?' active':''}" onclick="renderPresencas('${e}')">${e==='todos'?'Todos':e}</div>`).join('');
+    const filtered = escalao === 'todos' ? players : players.filter(p => p.escalao === escalao);
+    document.getElementById('presenca-list').innerHTML = filtered.map(p => `
+      <div class="presenca-row">
+        <div>
+          <div class="presenca-name">${p.nome}</div>
+          <div class="presenca-sub">${p.posicao} · ${p.escalao}</div>
+        </div>
+        <div class="presenca-btns">
+          <button class="pbtn${currentPresencas[p.id]==='P'?' p':''}" onclick="setPresenca('${p.id}','P',this)">P</button>
+          <button class="pbtn${currentPresencas[p.id]==='FCA'?' fca':''}" onclick="setPresenca('${p.id}','FCA',this)">FCA</button>
+          <button class="pbtn${currentPresencas[p.id]==='FSA'?' fsa':''}" onclick="setPresenca('${p.id}','FSA',this)">FSA</button>
+        </div>
+      </div>
+    `).join('');
+    const marcados = Object.values(currentPresencas).filter(v => v !== null).length;
+    document.getElementById('save-bar-text').textContent = `${marcados} de ${players.length} jogadores marcados`;
+  }
+
+  function setPresenca(id, estado, btn) {
+    currentPresencas[id] = currentPresencas[id] === estado ? null : estado;
+    renderPresencas(activePresencaEscalao);
+  }
+
+  function guardarPresencas() {
+    const marcados = Object.values(currentPresencas).filter(v => v !== null).length;
+    if (marcados === 0) { showToast('Marca pelo menos um jogador!'); return; }
+    sessions.push({ date: new Date(), presencas: {...currentPresencas} });
+    players.forEach(p => {
+      if (currentPresencas[p.id] !== null) { p.sessoes++; if (currentPresencas[p.id] === 'P') p.presencas++; }
+    });
+    currentPresencas = {};
+    players.forEach(p => currentPresencas[p.id] = null);
+    renderDashboard();
+    renderJogadores(activeEscalao);
+    renderPresencas(activePresencaEscalao);
+    showToast('✅ Sessão guardada com sucesso!');
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // CSV drag & drop
+  const drop = document.getElementById('csv-drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.borderColor = 'var(--green)'; });
+  drop.addEventListener('dragleave', () => { drop.style.borderColor = 'var(--green-border)'; });
+  drop.addEventListener('drop', e => {
+    e.preventDefault();
+    drop.style.borderColor = 'var(--green-border)';
+    const file = e.dataTransfer.files[0];
+    if (file) { const input = document.getElementById('csv-input'); const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; handleCSV(input); }
+  });
+</script>
+</body>
+</html>
