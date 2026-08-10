@@ -520,6 +520,12 @@
           <span style="font-size:0.8rem;color:var(--text-dim)">${sessions.length} sessões carregadas da época</span>
         </div>`;
         showToast(`${players.length} jogadores e ${sessions.length} sessões importados!`);
+        // Se já estiver na app, actualizar dashboard
+        if (document.getElementById('screen-app').style.display === 'block') {
+          renderDashboard();
+          renderJogadores(activeEscalao);
+          renderPresencas(activePresencaEscalao);
+        }
 
       } else {
         // Formato simples: nome, posicao, escalao
@@ -554,8 +560,10 @@
     if (players.length === 0) {
       showToast('Preenche o nome de pelo menos um jogador!'); return;
     }
-    // Init presencas
-    players.forEach(p => { p.presencas = 0; p.sessoes = 0; });
+    // Init presencas apenas se não vieram do CSV
+    if (sessions.length === 0) {
+      players.forEach(p => { p.presencas = 0; p.sessoes = 0; });
+    }
     currentPresencas = {};
     players.forEach(p => currentPresencas[p.id] = null);
     document.getElementById('screen-setup').style.display = 'none';
