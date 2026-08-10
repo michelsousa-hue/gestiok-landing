@@ -428,7 +428,19 @@
 
       if (isAssiduidade) {
         // Formato assiduidade: primeira coluna=nome, restantes=datas ou estatísticas
-        const header = lines[0].split(',');
+        // Parser que respeita campos entre aspas (ex: "52,17%")
+        function parseCSVLine(line) {
+          const result = [];
+          let cur = '', inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') { inQuotes = !inQuotes; }
+            else if (line[i] === ',' && !inQuotes) { result.push(cur.trim()); cur = ''; }
+            else { cur += line[i]; }
+          }
+          result.push(cur.trim());
+          return result;
+        }
+        const header = parseCSVLine(lines[0]);
         
         // Encontrar colunas de estatísticas no final
         const totalPresIdx = header.findIndex(h => h.toLowerCase().includes('total pres'));
@@ -457,7 +469,7 @@
         dateCols.forEach(dc => { sessionMap[dc.idx] = { date: dc.date, presencas: {} }; });
 
         dataLines.forEach((line, pi) => {
-          const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
+          const cols = parseCSVLine(line).map(c => c.replace(/"/g,''));
           const nome = cols[0];
           if (!nome) return;
 
