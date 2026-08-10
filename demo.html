@@ -477,17 +477,18 @@
           const nome = (row[0] || '').trim();
           if (!nome) return;
 
-          // Ler stats das colunas dedicadas
-          let presTotal = totalPresIdx > 0 ? parseInt(row[totalPresIdx]) || 0 : 0;
-          let treTotal  = totalTreIdx  > 0 ? parseInt(row[totalTreIdx])  || 0 : 0;
+          // Contar sempre manualmente a partir das colunas de datas — mais fiável
+          let presTotal = 0, treTotal = 0;
+          dateCols.forEach(({i}) => {
+            const v = (row[i] || '').toLowerCase().trim();
+            if (v) treTotal++;
+            if (v === 'p') presTotal++;
+          });
 
-          // Se não tiver, contar manualmente
-          if (!presTotal || !treTotal) {
-            dateCols.forEach(({i}) => {
-              const v = (row[i] || '').toLowerCase().trim();
-              if (v) treTotal++;
-              if (v === 'p') presTotal++;
-            });
+          // Se tiver colunas de stats e contagem manual for 0, usar stats
+          if (presTotal === 0 && treTotal === 0 && totalPresIdx > 0) {
+            presTotal = parseInt(row[totalPresIdx]) || 0;
+            treTotal  = parseInt(row[totalTreIdx])  || 0;
           }
 
           const id = Date.now() + pi * 1000 + Math.random();
