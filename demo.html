@@ -447,6 +447,7 @@
             </select>
             <button class="btn btn-primary" id="btn-iniciar" onclick="iniciarJogo()">▶ Iniciar</button>
             <button class="btn btn-outline" onclick="resetJogo()" style="color:var(--red);border-color:var(--red);">↺ Reset</button>
+            <button class="btn" style="background:#0f172a;color:#fff;" id="btn-stop" onclick="stopJogo()" disabled>⏹ Terminar jogo</button>
           </div>
 
           <!-- Marcador -->
@@ -533,6 +534,40 @@
 <div class="toast" id="toast"></div>
 
 <!-- MODAL JOGADOR -->
+<!-- MODAL RESUMO JOGO -->
+<div id="modal-resumo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--white);border-radius:20px;padding:0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);">
+    
+    <!-- Header escuro com resultado -->
+    <div style="background:#0f172a;border-radius:20px 20px 0 0;padding:28px 28px 24px;">
+      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Resultado Final</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:6px;" id="resumo-home-name">Casa</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:3.5rem;color:#ffffff;line-height:1;" id="resumo-home-goals">0</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.2rem;color:#475569;">—</div>
+          <div style="font-size:0.72rem;color:#475569;margin-top:4px;" id="resumo-duracao"></div>
+        </div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:6px;" id="resumo-away-name">Fora</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:3.5rem;color:#ffffff;line-height:1;" id="resumo-away-goals">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div style="padding:24px;">
+      <div id="resumo-content"></div>
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="document.getElementById('modal-resumo').style.display='none'">Fechar</button>
+        <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="document.getElementById('modal-resumo').style.display='none';resetJogo()">Novo jogo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
   <div style="background:var(--white);border-radius:var(--radius);padding:28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);">
     <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin-bottom:6px;" id="modal-title">Seleccionar jogador</div>
@@ -913,6 +948,7 @@
       document.getElementById('score-home-name').textContent = clubeName;
       jogoRunning = true;
       document.getElementById('btn-iniciar').textContent = '⏸ Pausar';
+      document.getElementById('btn-stop').disabled = false;
       document.getElementById('score-status').textContent = '● Em curso';
       document.getElementById('score-status').style.color = '#ef4444';
       document.getElementById('jogo-btns').style.opacity = '1';
@@ -932,6 +968,91 @@
     }
   }
 
+  function stopJogo() {
+    // Parar cronómetro
+    clearInterval(jogoTimer);
+    jogoRunning = false;
+
+    const m = Math.floor(jogoSeconds / 60);
+    const s = jogoSeconds % 60;
+    const duracaoStr = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+    const homeName = document.getElementById('score-home-name').textContent;
+    const awayName = document.getElementById('score-away-name').textContent;
+
+    // Popular modal
+    document.getElementById('resumo-home-name').textContent = homeName;
+    document.getElementById('resumo-away-name').textContent = awayName;
+    document.getElementById('resumo-home-goals').textContent = jogoHomeGoals;
+    document.getElementById('resumo-away-goals').textContent = jogoAwayGoals;
+    document.getElementById('resumo-duracao').textContent = duracaoStr;
+
+    // Separar eventos por tipo
+    const golos = jogoEvents.filter(e => e.icon === '⚽');
+    const cartoes = jogoEvents.filter(e => ['🟨','🟦','🟥'].includes(e.icon));
+    const subs = jogoEvents.filter(e => e.icon === '🔄');
+    const faltas = jogoEvents.filter(e => e.icon === '⚠️');
+
+    let html = '';
+
+    // Stats rápidas
+    html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;">Golos</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--green);">${jogoHomeGoals} — ${jogoAwayGoals}</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;">Faltas</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--text);">${jogoHomeFaltas} — ${jogoAwayFaltas}</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;">Duração</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--text);">${duracaoStr}</div>
+      </div>
+    </div>`;
+
+    // Golos
+    if (golos.length > 0) {
+      html += `<div style="margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">⚽ Golos</div>
+        ${golos.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
+          <span style="font-weight:700;color:var(--green);min-width:42px;">${e.tempo}</span>
+          <span style="color:var(--text-muted);">${e.text.replace('Golo — ','')}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    // Cartões
+    if (cartoes.length > 0) {
+      html += `<div style="margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">🟨 Cartões</div>
+        ${cartoes.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
+          <span style="font-weight:700;color:var(--amber);min-width:42px;">${e.tempo}</span>
+          <span>${e.icon}</span>
+          <span style="color:var(--text-muted);">${e.text.split('— ')[1]||''}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    // Substituições
+    if (subs.length > 0) {
+      html += `<div style="margin-bottom:16px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">🔄 Substituições</div>
+        ${subs.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
+          <span style="font-weight:700;color:#7c3aed;min-width:42px;">${e.tempo}</span>
+          <span style="color:var(--text-muted);">${e.text.replace('Substituição — ','')}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    if (golos.length === 0 && cartoes.length === 0 && subs.length === 0) {
+      html += `<p style="color:var(--text-dim);font-size:0.85rem;text-align:center;padding:16px 0;">Sem eventos registados.</p>`;
+    }
+
+    document.getElementById('resumo-content').innerHTML = html;
+    document.getElementById('modal-resumo').style.display = 'flex';
+  }
+
   function resetJogo() {
     clearInterval(jogoTimer);
     jogoRunning = false;
@@ -948,6 +1069,7 @@
     document.getElementById('score-status').textContent = 'Pronto para iniciar';
     document.getElementById('score-parte').textContent = 'Parte 1';
     document.getElementById('btn-iniciar').textContent = '▶ Iniciar';
+    document.getElementById('btn-stop').disabled = true;
     document.getElementById('jogo-btns').style.opacity = '0.4';
     document.getElementById('jogo-btns').style.pointerEvents = 'none';
     document.getElementById('jogo-feed').innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Aguarda início do jogo...</div>';
