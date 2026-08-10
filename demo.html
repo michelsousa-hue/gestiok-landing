@@ -170,6 +170,37 @@
     .cta-strip-text h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
     .cta-strip-text p { font-size: 0.82rem; color: var(--text-muted); }
 
+    /* FICHA INDIVIDUAL */
+    .ficha-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+    .ficha-stat { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .ficha-stat-label { font-size: 0.68rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .ficha-stat-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--text); }
+    .ficha-stat-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+    .ficha-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .ficha-chart-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .ficha-chart-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 16px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 140px; }
+    .chart-col { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+    .chart-bar-stack { display: flex; flex-direction: column-reverse; width: 100%; border-radius: 4px 4px 0 0; overflow: hidden; }
+    .chart-bar-seg { width: 100%; transition: height 0.5s ease; }
+    .chart-label { font-size: 0.62rem; color: var(--text-dim); margin-top: 4px; text-align: center; }
+    .chart-val { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); }
+    .distrib-bar { margin-bottom: 10px; }
+    .distrib-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; }
+    .distrib-label span:first-child { color: var(--text-muted); }
+    .distrib-label span:last-child { font-weight: 700; color: var(--text); }
+    .distrib-track { height: 10px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+    .distrib-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .comp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .comp-name { font-size: 0.82rem; color: var(--text-muted); min-width: 80px; }
+    .comp-track { flex: 1; height: 14px; background: var(--bg); border-radius: 999px; overflow: hidden; position: relative; }
+    .comp-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .comp-pct { font-size: 0.78rem; font-weight: 700; min-width: 40px; text-align: right; }
+    .meta-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); opacity: 0.7; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--text-muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
     /* TOAST */
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -268,6 +299,11 @@
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>
         Presenças
       </button>
+      <div class="sidebar-section">Análise</div>
+      <button class="nav-item" onclick="showPage('ficha', this); renderFicha()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h4"/></svg>
+        Ficha Individual
+      </button>
     </div>
 
     <div class="main">
@@ -350,6 +386,19 @@
             Guardar sessão
           </button>
         </div>
+      </div>
+
+      <!-- FICHA INDIVIDUAL -->
+      <div class="page" id="page-ficha">
+        <div class="page-title">Ficha Individual</div>
+        <div class="page-sub">Análise detalhada por jogador</div>
+
+        <div style="margin-bottom:20px;">
+          <select id="ficha-select" onchange="renderFicha()" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--text);outline:none;min-width:280px;">
+          </select>
+        </div>
+
+        <div id="ficha-content"></div>
       </div>
 
     </div>
@@ -680,6 +729,169 @@
     renderJogadores(activeEscalao);
     renderPresencas(activePresencaEscalao);
     showToast('✅ Sessão guardada com sucesso!');
+  }
+
+  // FICHA INDIVIDUAL
+  function renderFicha() {
+    if (players.length === 0) return;
+
+    // Popular select
+    const sel = document.getElementById('ficha-select');
+    const curId = sel.value || players[0].id;
+    sel.innerHTML = players.map(p => `<option value="${p.id}"${p.id==curId?' selected':''}>${p.nome}</option>`).join('');
+
+    const player = players.find(p => p.id == sel.value) || players[0];
+    if (!player) return;
+
+    const pct = player.sessoes > 0 ? Math.round(player.presencas / player.sessoes * 100) : 0;
+    const mediaGrupo = players.length > 0 ? Math.round(players.reduce((a,p) => a + (p.sessoes>0?p.presencas/p.sessoes:0), 0) / players.length * 100) : 0;
+    const meta = 75;
+
+    // Calcular distribuição por tipo a partir das sessões
+    let cntP = 0, cntFCA = 0, cntFSA = 0, cntL = 0, cntTotal = 0;
+    sessions.forEach(s => {
+      const v = s.presencas[player.id];
+      if (!v) return;
+      cntTotal++;
+      if (v === 'P') cntP++;
+      else if (v === 'FCA') cntFCA++;
+      else if (v === 'FSA') cntFSA++;
+    });
+    // Se não tiver sessões detalhadas, usar totais
+    if (cntTotal === 0 && player.sessoes > 0) {
+      cntP = player.presencas;
+      cntTotal = player.sessoes;
+      cntFCA = player.sessoes - player.presencas;
+    }
+
+    // Calcular dados mensais a partir das sessões
+    const monthMap = {};
+    const monthNames = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    sessions.forEach(s => {
+      // Tentar extrair mês da data
+      let month = null;
+      if (typeof s.date === 'string') {
+        const parts = s.date.split('/');
+        if (parts.length >= 2) {
+          const m = parseInt(parts[0]) - 1;
+          if (!isNaN(m) && m >= 0 && m <= 11) month = m;
+        }
+        // Formato MM/DD
+        if (month === null) {
+          const m2 = parseInt(s.date.split('/')[1]) - 1;
+          if (!isNaN(m2)) month = m2;
+        }
+      }
+      if (month === null) return;
+      if (!monthMap[month]) monthMap[month] = { p:0, fca:0, fsa:0, total:0 };
+      const v = s.presencas[player.id];
+      if (!v) return;
+      monthMap[month].total++;
+      if (v === 'P') monthMap[month].p++;
+      else if (v === 'FCA') monthMap[month].fca++;
+      else if (v === 'FSA' || v === 'L') monthMap[month].fsa++;
+    });
+
+    const months = Object.entries(monthMap).sort((a,b) => parseInt(a[0])-parseInt(b[0]));
+    const maxMonth = months.length > 0 ? Math.max(...months.map(([,d]) => d.total)) : 1;
+
+    // Gráfico mensal
+    const barHeight = 120;
+    const monthBars = months.map(([m, d]) => {
+      const pH  = Math.round(d.p   / maxMonth * barHeight);
+      const fcaH = Math.round(d.fca / maxMonth * barHeight);
+      const fsaH = Math.round(d.fsa / maxMonth * barHeight);
+      return `<div class="chart-col">
+        <div class="chart-val">${d.p}/${d.total}</div>
+        <div class="chart-bar-stack" style="height:${barHeight}px;">
+          <div class="chart-bar-seg" style="height:${pH}px;background:#16a34a;"></div>
+          <div class="chart-bar-seg" style="height:${fcaH}px;background:#f59e0b;"></div>
+          <div class="chart-bar-seg" style="height:${fsaH}px;background:#ef4444;"></div>
+        </div>
+        <div class="chart-label">${monthNames[parseInt(m)]}</div>
+      </div>`;
+    }).join('');
+
+    // Cor da taxa
+    const taxaColor = pct >= meta ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
+
+    document.getElementById('ficha-content').innerHTML = `
+      <div class="ficha-stats">
+        <div class="ficha-stat">
+          <div class="ficha-stat-label">Presenças</div>
+          <div class="ficha-stat-value">${player.presencas}/${player.sessoes}</div>
+          <div class="ficha-stat-sub">${pct}% de taxa</div>
+        </div>
+        <div class="ficha-stat">
+          <div class="ficha-stat-label">Taxa presença</div>
+          <div class="ficha-stat-value" style="color:${taxaColor}">${pct}%</div>
+          <div class="ficha-stat-sub">Meta ${meta}%</div>
+        </div>
+        <div class="ficha-stat">
+          <div class="ficha-stat-label">Média grupo</div>
+          <div class="ficha-stat-value">${mediaGrupo}%</div>
+          <div class="ficha-stat-sub">grupo</div>
+        </div>
+        <div class="ficha-stat">
+          <div class="ficha-stat-label">Faltas s/ aviso</div>
+          <div class="ficha-stat-value" style="color:var(--red)">${cntFSA}</div>
+          <div class="ficha-stat-sub">s/ aviso</div>
+        </div>
+      </div>
+
+      <div class="ficha-charts">
+        <div class="ficha-chart-card">
+          <div class="ficha-chart-title">Evolução Mensal de Presenças</div>
+          ${months.length > 0 ? `
+            <div class="chart-bars">${monthBars}</div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Presente</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>FCA</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>FSA/L</div>
+            </div>
+          ` : '<p style="color:var(--text-dim);font-size:0.85rem;">Sem dados mensais disponíveis</p>'}
+        </div>
+
+        <div class="ficha-chart-card">
+          <div class="ficha-chart-title">Distribuição de Presenças</div>
+          <div class="distrib-bar">
+            <div class="distrib-label"><span>Presente (P)</span><span>${cntP} (${cntTotal>0?Math.round(cntP/cntTotal*100):0}%)</span></div>
+            <div class="distrib-track"><div class="distrib-fill" style="width:${cntTotal>0?Math.round(cntP/cntTotal*100):0}%;background:#16a34a;"></div></div>
+          </div>
+          <div class="distrib-bar">
+            <div class="distrib-label"><span>Falta c/ aviso (FCA)</span><span>${cntFCA} (${cntTotal>0?Math.round(cntFCA/cntTotal*100):0}%)</span></div>
+            <div class="distrib-track"><div class="distrib-fill" style="width:${cntTotal>0?Math.round(cntFCA/cntTotal*100):0}%;background:#f59e0b;"></div></div>
+          </div>
+          <div class="distrib-bar">
+            <div class="distrib-label"><span>Falta s/ aviso (FSA)</span><span>${cntFSA} (${cntTotal>0?Math.round(cntFSA/cntTotal*100):0}%)</span></div>
+            <div class="distrib-track"><div class="distrib-fill" style="width:${cntTotal>0?Math.round(cntFSA/cntTotal*100):0}%;background:#ef4444;"></div></div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="ficha-chart-title" style="margin-bottom:12px;">Comparação com grupo e meta</div>
+            <div class="comp-row">
+              <div class="comp-name">${player.nome.split(' ')[0]}</div>
+              <div class="comp-track">
+                <div class="comp-fill" style="width:${pct}%;background:${taxaColor};"></div>
+                <div class="meta-line" style="left:${meta}%;"></div>
+              </div>
+              <div class="comp-pct" style="color:${taxaColor}">${pct}%</div>
+            </div>
+            <div class="comp-row">
+              <div class="comp-name">Média grupo</div>
+              <div class="comp-track">
+                <div class="comp-fill" style="width:${mediaGrupo}%;background:#94a3b8;"></div>
+                <div class="meta-line" style="left:${meta}%;"></div>
+              </div>
+              <div class="comp-pct" style="color:var(--text-muted)">${mediaGrupo}%</div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-top:6px;">
+              <span style="color:var(--red)">|</span> Meta ${meta}%
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // TOAST
