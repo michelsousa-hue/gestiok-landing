@@ -185,6 +185,7 @@
     .score-timer { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: #ffffff; letter-spacing: 0.05em; }
     .score-parte { font-size: 0.78rem; color: #64748b; margin-top: 4px; }
     .jogo-eventos-btns { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; transition: opacity 0.3s; }
+    .jogo-eventos-btns .evt-btn { width: 100%; }
     .evento-group { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
     .evento-group-title { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); margin-bottom: 4px; }
     .evt-btn { padding: 9px 12px; border-radius: var(--radius-sm); border: none; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
@@ -242,6 +243,9 @@
     /* TOAST */
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
     .toast.show { transform: translateY(0); opacity: 1; }
+
+    #modal-overlay { display: none; }
+    #modal-overlay.open { display: flex !important; }
 
     @media(max-width:768px) {
       .app-layout { grid-template-columns: 1fr; }
@@ -466,23 +470,31 @@
           <div class="jogo-eventos-btns" id="jogo-btns" style="opacity:0.4;pointer-events:none;">
             <div class="evento-group">
               <div class="evento-group-title">⚽ Golos</div>
-              <button class="evt-btn evt-home" onclick="addEvento('golo','home')">Golo Casa</button>
-              <button class="evt-btn evt-away" onclick="addEvento('golo','away')">Golo Fora</button>
+              <button class="evt-btn evt-home" onclick="abrirModal('golo','home')">Golo Casa</button>
+              <button class="evt-btn evt-away" onclick="abrirModal('golo','away')">Golo Fora</button>
             </div>
             <div class="evento-group">
               <div class="evento-group-title">⚠️ Faltas</div>
-              <button class="evt-btn evt-neutral" onclick="addEvento('falta','home')">Falta Casa</button>
-              <button class="evt-btn evt-neutral" onclick="addEvento('falta','away')">Falta Fora</button>
+              <button class="evt-btn evt-neutral" onclick="abrirModal('falta','home')">Falta Casa</button>
+              <button class="evt-btn evt-neutral" onclick="abrirModal('falta','away')">Falta Fora</button>
             </div>
             <div class="evento-group">
-              <div class="evento-group-title">🟨 Cartões</div>
-              <button class="evt-btn evt-yellow" onclick="addEvento('amarelo','home')">Amarelo Casa</button>
-              <button class="evt-btn evt-yellow" onclick="addEvento('amarelo','away')">Amarelo Fora</button>
+              <div class="evento-group-title">🟨🟦 Cartões</div>
+              <button class="evt-btn evt-yellow" onclick="abrirModal('amarelo','home')">Amarelo Casa</button>
+              <button class="evt-btn" style="background:#dbeafe;color:#2563eb;" onclick="abrirModal('azul','home')">Azul Casa</button>
+              <button class="evt-btn evt-red" onclick="abrirModal('vermelho','home')">Vermelho Casa</button>
             </div>
             <div class="evento-group">
-              <div class="evento-group-title">🟥 Vermelho</div>
-              <button class="evt-btn evt-red" onclick="addEvento('vermelho','home')">Vermelho Casa</button>
-              <button class="evt-btn evt-red" onclick="addEvento('vermelho','away')">Vermelho Fora</button>
+              <div class="evento-group-title">🟥 Adversário</div>
+              <button class="evt-btn evt-yellow" onclick="addEvento('amarelo','away', null)">Amarelo Fora</button>
+              <button class="evt-btn" style="background:#dbeafe;color:#2563eb;" onclick="addEvento('azul','away', null)">Azul Fora</button>
+              <button class="evt-btn evt-red" onclick="addEvento('vermelho','away', null)">Vermelho Fora</button>
+            </div>
+            <div class="evento-group" style="grid-column:span 4;">
+              <div class="evento-group-title">🔄 Substituições</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="evt-btn" style="background:#f3e8ff;color:#7c3aed;flex:1;" onclick="abrirModalSub()">🔄 Substituição Casa</button>
+              </div>
             </div>
           </div>
 
@@ -519,6 +531,32 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- MODAL JOGADOR -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:var(--radius);padding:28px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--text);margin-bottom:6px;" id="modal-title">Seleccionar jogador</div>
+    <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:16px;" id="modal-sub"></div>
+    
+    <!-- Selector normal -->
+    <div id="modal-normal">
+      <select id="modal-jogador" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--text);outline:none;margin-bottom:16px;"></select>
+    </div>
+
+    <!-- Selector substituição -->
+    <div id="modal-sub-area" style="display:none;">
+      <label style="font-size:0.78rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px;">🔴 Sai</label>
+      <select id="modal-sai" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;margin-bottom:12px;"></select>
+      <label style="font-size:0.78rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px;">🟢 Entra</label>
+      <select id="modal-entra" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;margin-bottom:16px;"></select>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="confirmarEvento()">Confirmar</button>
+      <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // STATE
@@ -916,28 +954,90 @@
     renderJogoStats();
   }
 
-  function addEvento(tipo, equipa) {
+  let modalTipo = null, modalEquipa = null, modalIsSub = false;
+
+  function abrirModalSub() {
+    modalIsSub = true;
+    modalTipo = 'substituicao'; modalEquipa = 'home';
+    document.getElementById('modal-title').textContent = '🔄 Substituição';
+    document.getElementById('modal-sub').textContent = document.getElementById('score-home-name').textContent;
+    document.getElementById('modal-normal').style.display = 'none';
+    document.getElementById('modal-sub-area').style.display = 'block';
+    const opts = '<option value="">— Seleccionar —</option>' + players.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    document.getElementById('modal-sai').innerHTML = opts;
+    document.getElementById('modal-entra').innerHTML = opts;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function abrirModal(tipo, equipa) {
+    modalIsSub = false;
+    document.getElementById('modal-normal').style.display = 'block';
+    document.getElementById('modal-sub-area').style.display = 'none';
+    modalTipo = tipo; modalEquipa = equipa;
+    const icons = { golo:'⚽', falta:'⚠️', amarelo:'🟨', azul:'🟦', vermelho:'🟥' };
+    const labels = { golo:'Quem marcou?', falta:'Quem fez falta?', amarelo:'Quem levou amarelo?', azul:'Quem levou azul?', vermelho:'Quem levou vermelho?' };
+    document.getElementById('modal-title').textContent = icons[tipo] + ' ' + (labels[tipo] || 'Seleccionar jogador');
+    document.getElementById('modal-sub').textContent = equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent;
+
+    // Popular select com jogadores
+    const sel = document.getElementById('modal-jogador');
+    sel.innerHTML = '<option value="">— Seleccionar jogador —</option>' +
+      players.map(p => `<option value="${p.id}">${p.nome} (${p.escalao})</option>`).join('');
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function fecharModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    modalTipo = null; modalEquipa = null; modalIsSub = false;
+  }
+
+  function confirmarEvento() {
+    if (modalIsSub) {
+      const saiSel = document.getElementById('modal-sai');
+      const entraSel = document.getElementById('modal-entra');
+      const saiNome = saiSel.options[saiSel.selectedIndex]?.text || '?';
+      const entraNome = entraSel.options[entraSel.selectedIndex]?.text || '?';
+      fecharModal();
+      addEvento('substituicao', 'home', null, saiNome, entraNome);
+    } else {
+      const sel = document.getElementById('modal-jogador');
+      const jogadorNome = sel.options[sel.selectedIndex]?.text?.split(' (')[0] || null;
+      fecharModal();
+      addEvento(modalTipo || 'golo', modalEquipa || 'home', jogadorNome);
+    }
+  }
+
+  function addEvento(tipo, equipa, jogador, sai, entra) {
     const m = Math.floor(jogoSeconds / 60);
     const s = jogoSeconds % 60;
     const tempoStr = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    const homeName = document.getElementById('score-home-name').textContent;
+    const awayName = document.getElementById('score-away-name').textContent;
+    const equipaNome = equipa === 'home' ? homeName : awayName;
+    const jogadorStr = jogador ? jogador : equipaNome;
 
-    let icon = '', text = '', animate = true;
+    let icon = '', text = '';
 
     if (tipo === 'golo') {
-      if (equipa === 'home') { jogoHomeGoals++; document.getElementById('score-home').textContent = jogoHomeGoals; icon = '⚽'; text = `Golo — ${document.getElementById('score-home-name').textContent}`; }
-      else { jogoAwayGoals++; document.getElementById('score-away').textContent = jogoAwayGoals; icon = '⚽'; text = `Golo — ${document.getElementById('score-away-name').textContent}`; }
-      // Animação no marcador
+      if (equipa === 'home') { jogoHomeGoals++; document.getElementById('score-home').textContent = jogoHomeGoals; }
+      else { jogoAwayGoals++; document.getElementById('score-away').textContent = jogoAwayGoals; }
+      icon = '⚽'; text = `Golo — ${jogadorStr}`;
       const el = document.getElementById(equipa === 'home' ? 'score-home' : 'score-away');
-      el.style.color = '#22c55e'; setTimeout(() => el.style.color = '#ffffff', 1000);
+      el.style.color = '#22c55e'; setTimeout(() => el.style.color = '#ffffff', 1200);
     } else if (tipo === 'falta') {
       if (equipa === 'home') jogoHomeFaltas++; else jogoAwayFaltas++;
-      icon = '⚠️'; text = `Falta — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+      icon = '⚠️'; text = `Falta — ${jogadorStr}`;
     } else if (tipo === 'amarelo') {
-      icon = '🟨'; text = `Cartão amarelo — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+      icon = '🟨'; text = `Cartão amarelo — ${jogadorStr}`;
+    } else if (tipo === 'azul') {
+      icon = '🟦'; text = `Cartão azul — ${jogadorStr}`;
     } else if (tipo === 'vermelho') {
-      icon = '🟥'; text = `Cartão vermelho — ${equipa === 'home' ? document.getElementById('score-home-name').textContent : document.getElementById('score-away-name').textContent}`;
+      icon = '🟥'; text = `Cartão vermelho — ${jogadorStr}`;
+    } else if (tipo === 'substituicao') {
+      icon = '🔄'; text = `Substituição — 🔴 ${sai||'?'} → 🟢 ${entra||'?'}`;
     } else if (tipo === 'parte') {
-      icon = '🔔'; text = 'Início da 2ª Parte'; animate = false;
+      icon = '🔔'; text = 'Início da 2ª Parte';
     }
 
     jogoEvents.unshift({ tempo: tempoStr, icon, text });
