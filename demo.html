@@ -987,11 +987,20 @@
     document.getElementById('resumo-away-goals').textContent = jogoAwayGoals;
     document.getElementById('resumo-duracao').textContent = duracaoStr;
 
-    // Separar eventos por tipo
-    const golos = jogoEvents.filter(e => e.icon === '⚽');
-    const cartoes = jogoEvents.filter(e => ['🟨','🟦','🟥'].includes(e.icon));
+    // Separar eventos por equipa e tipo
+    const golosHome = jogoEvents.filter(e => e.icon === '⚽' && e.equipa === 'home');
+    const golosAway = jogoEvents.filter(e => e.icon === '⚽' && e.equipa === 'away');
+    const cartoesHome = jogoEvents.filter(e => ['🟨','🟦','🟥'].includes(e.icon) && e.equipa === 'home');
+    const cartoesAway = jogoEvents.filter(e => ['🟨','🟦','🟥'].includes(e.icon) && e.equipa === 'away');
     const subs = jogoEvents.filter(e => e.icon === '🔄');
-    const faltas = jogoEvents.filter(e => e.icon === '⚠️');
+
+    function eventoRow(e, color) {
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
+        <span style="font-weight:700;color:${color};min-width:42px;">${e.tempo}</span>
+        <span>${e.icon}</span>
+        <span style="color:var(--text-muted);">${e.jogador || e.text.split('— ')[1] || ''}</span>
+      </div>`;
+    }
 
     let html = '';
 
@@ -1011,26 +1020,35 @@
       </div>
     </div>`;
 
-    // Golos
-    if (golos.length > 0) {
-      html += `<div style="margin-bottom:16px;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">⚽ Golos</div>
-        ${golos.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
-          <span style="font-weight:700;color:var(--green);min-width:42px;">${e.tempo}</span>
-          <span style="color:var(--text-muted);">${e.text.replace('Golo — ','')}</span>
-        </div>`).join('')}
-      </div>`;
-    }
+    // Golos — duas colunas
+    html += `<div style="margin-bottom:16px;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">⚽ Golos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;">${homeName}</div>
+          ${golosHome.length > 0 ? golosHome.map(e => eventoRow(e,'var(--green)')).join('') : '<div style="font-size:0.8rem;color:var(--text-dim);padding:4px 0;">—</div>'}
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--red);margin-bottom:6px;text-transform:uppercase;">${awayName}</div>
+          ${golosAway.length > 0 ? golosAway.map(e => eventoRow(e,'var(--red)')).join('') : '<div style="font-size:0.8rem;color:var(--text-dim);padding:4px 0;">—</div>'}
+        </div>
+      </div>
+    </div>`;
 
-    // Cartões
-    if (cartoes.length > 0) {
+    // Cartões — duas colunas
+    if (cartoesHome.length > 0 || cartoesAway.length > 0) {
       html += `<div style="margin-bottom:16px;">
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:10px;">🟨 Cartões</div>
-        ${cartoes.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg);font-size:0.83rem;">
-          <span style="font-weight:700;color:var(--amber);min-width:42px;">${e.tempo}</span>
-          <span>${e.icon}</span>
-          <span style="color:var(--text-muted);">${e.text.split('— ')[1]||''}</span>
-        </div>`).join('')}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--green);margin-bottom:6px;text-transform:uppercase;">${homeName}</div>
+            ${cartoesHome.length > 0 ? cartoesHome.map(e => eventoRow(e,'var(--amber)')).join('') : '<div style="font-size:0.8rem;color:var(--text-dim);padding:4px 0;">—</div>'}
+          </div>
+          <div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--red);margin-bottom:6px;text-transform:uppercase;">${awayName}</div>
+            ${cartoesAway.length > 0 ? cartoesAway.map(e => eventoRow(e,'var(--amber)')).join('') : '<div style="font-size:0.8rem;color:var(--text-dim);padding:4px 0;">—</div>'}
+          </div>
+        </div>
       </div>`;
     }
 
@@ -1043,10 +1061,6 @@
           <span style="color:var(--text-muted);">${e.text.replace('Substituição — ','')}</span>
         </div>`).join('')}
       </div>`;
-    }
-
-    if (golos.length === 0 && cartoes.length === 0 && subs.length === 0) {
-      html += `<p style="color:var(--text-dim);font-size:0.85rem;text-align:center;padding:16px 0;">Sem eventos registados.</p>`;
     }
 
     document.getElementById('resumo-content').innerHTML = html;
@@ -1162,7 +1176,7 @@
       icon = '🔔'; text = 'Início da 2ª Parte';
     }
 
-    jogoEvents.unshift({ tempo: tempoStr, icon, text });
+    jogoEvents.unshift({ tempo: tempoStr, icon, text, equipa, jogador: jogador || null });
 
     const feed = document.getElementById('jogo-feed');
     feed.innerHTML = jogoEvents.map(e => `
