@@ -440,14 +440,43 @@
         <div class="jogo-layout">
 
           <!-- Configuração -->
-          <div id="jogo-setup-bar" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-            <input id="jogo-adversario" type="text" placeholder="Nome do adversário" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);outline:none;min-width:200px;" />
-            <select id="jogo-escalao" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);outline:none;">
-              <option>Sénior</option><option>Sub-20</option><option>Sub-17</option><option>Sub-15</option><option>Sub-13</option><option>Sub-11</option><option>Sub-9</option>
-            </select>
-            <button class="btn btn-primary" id="btn-iniciar" onclick="iniciarJogo()">▶ Iniciar</button>
-            <button class="btn btn-outline" onclick="resetJogo()" style="color:var(--red);border-color:var(--red);">↺ Reset</button>
-            <button class="btn" style="background:#0f172a;color:#fff;" id="btn-stop" onclick="stopJogo()" disabled>⏹ Terminar jogo</button>
+          <div id="jogo-setup-card" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:14px;">⚙️ Configuração do Jogo</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">🏠 Equipa Casa</label>
+                <input id="jogo-home" type="text" placeholder="Nome da equipa da casa" style="width:100%;background:var(--bg);border:1.5px solid var(--green-border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;" />
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">✈️ Equipa Fora</label>
+                <input id="jogo-away" type="text" placeholder="Nome da equipa visitante" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;" />
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">📅 Data</label>
+                <input id="jogo-data" type="date" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;" />
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">🕐 Hora</label>
+                <input id="jogo-hora" type="time" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;" />
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">📍 Local</label>
+                <input id="jogo-local" type="text" placeholder="ex: Pavilhão Municipal" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;" />
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:end;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px;">🏒 Escalão</label>
+                <select id="jogo-escalao" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;">
+                  <option>Sénior</option><option>Sub-20</option><option>Sub-17</option><option>Sub-15</option><option>Sub-13</option><option>Sub-11</option><option>Sub-9</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="btn-iniciar" onclick="iniciarJogo()">▶ Iniciar</button>
+              <button class="btn btn-outline" onclick="resetJogo()" style="color:var(--red);border-color:var(--red);">↺ Reset</button>
+              <button class="btn" style="background:#0f172a;color:#fff;" id="btn-stop" onclick="stopJogo()" disabled>⏹ Terminar</button>
+            </div>
           </div>
 
           <!-- Marcador -->
@@ -549,6 +578,7 @@
         <div style="text-align:center;">
           <div style="font-size:1.2rem;color:#475569;">—</div>
           <div style="font-size:0.72rem;color:#475569;margin-top:4px;" id="resumo-duracao"></div>
+        <div id="resumo-info"></div>
         </div>
         <div style="text-align:center;flex:1;">
           <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:6px;" id="resumo-away-name">Fora</div>
@@ -931,7 +961,16 @@
 
   function initJogo() {
     clubeName = document.getElementById('sidebar-club').textContent.replace('✓','').trim() || 'O Meu Clube';
-    document.getElementById('score-home-name').textContent = clubeName;
+    // Preencher data e hora actuais automaticamente
+    const now = new Date();
+    const dataStr = now.toISOString().split('T')[0];
+    const horaStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('jogo-data').value = dataStr;
+    document.getElementById('jogo-hora').value = horaStr;
+    // Preencher nome do clube se ainda não estiver
+    if (!document.getElementById('jogo-home').value) {
+      document.getElementById('jogo-home').value = clubeName;
+    }
     renderJogoStats();
   }
 
@@ -943,9 +982,10 @@
       document.getElementById('btn-iniciar').textContent = '▶ Continuar';
       document.getElementById('score-status').textContent = 'Pausado';
     } else {
-      const adv = document.getElementById('jogo-adversario').value.trim() || 'Adversário';
-      document.getElementById('score-away-name').textContent = adv;
-      document.getElementById('score-home-name').textContent = clubeName;
+      const homeName = document.getElementById('jogo-home').value.trim() || clubeName;
+      const awayName = document.getElementById('jogo-away').value.trim() || 'Adversário';
+      document.getElementById('score-home-name').textContent = homeName;
+      document.getElementById('score-away-name').textContent = awayName;
       jogoRunning = true;
       document.getElementById('btn-iniciar').textContent = '⏸ Pausar';
       document.getElementById('btn-stop').disabled = false;
@@ -981,11 +1021,21 @@
     const awayName = document.getElementById('score-away-name').textContent;
 
     // Popular modal
+    const jogoData = document.getElementById('jogo-data').value;
+    const jogoHora = document.getElementById('jogo-hora').value;
+    const jogoLocal = document.getElementById('jogo-local').value.trim();
+    const dataFormatada = jogoData ? new Date(jogoData).toLocaleDateString('pt-PT', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+    const infoStr = [dataFormatada, jogoHora, jogoLocal].filter(Boolean).join(' · ');
+
     document.getElementById('resumo-home-name').textContent = homeName;
     document.getElementById('resumo-away-name').textContent = awayName;
     document.getElementById('resumo-home-goals').textContent = jogoHomeGoals;
     document.getElementById('resumo-away-goals').textContent = jogoAwayGoals;
     document.getElementById('resumo-duracao').textContent = duracaoStr;
+
+    // Mostrar info do jogo no modal
+    let infoHtml = infoStr ? `<div style="text-align:center;font-size:0.75rem;color:#64748b;margin-top:8px;">${infoStr}</div>` : '';
+    document.getElementById('resumo-info').innerHTML = infoHtml;
 
     // Separar eventos por equipa e tipo
     const golosHome = jogoEvents.filter(e => e.icon === '⚽' && e.equipa === 'home');
@@ -1084,6 +1134,10 @@
     document.getElementById('score-parte').textContent = 'Parte 1';
     document.getElementById('btn-iniciar').textContent = '▶ Iniciar';
     document.getElementById('btn-stop').disabled = true;
+    document.getElementById('jogo-away').value = '';
+    document.getElementById('jogo-local').value = '';
+    document.getElementById('score-home-name').textContent = clubeName;
+    document.getElementById('score-away-name').textContent = 'Adversário';
     document.getElementById('jogo-btns').style.opacity = '0.4';
     document.getElementById('jogo-btns').style.pointerEvents = 'none';
     document.getElementById('jogo-feed').innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;">Aguarda início do jogo...</div>';
