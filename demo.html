@@ -466,20 +466,21 @@
           // Usar colunas de estatísticas se disponíveis
           if (totalPresIdx > 0 && cols[totalPresIdx]) presTotal = parseInt(cols[totalPresIdx]) || 0;
           if (totalTreIdx > 0 && cols[totalTreIdx]) treTotal = parseInt(cols[totalTreIdx]) || 0;
-          if (pctIdx > 0 && cols[pctIdx]) {
-            pct = parseFloat(cols[pctIdx].replace(',','.').replace('%','')) || 0;
-          } else if (treTotal > 0) {
-            pct = Math.round(presTotal / treTotal * 100);
-          }
 
-          // Se não tiver colunas de stats, contar manualmente
-          if (!presTotal && !treTotal) {
-            dateCols.forEach(dc => {
-              const val = (cols[dc.idx] || '').toLowerCase().trim();
-              if (val && val !== '') treTotal++;
-              if (val === 'p') presTotal++;
-            });
-            pct = treTotal > 0 ? Math.round(presTotal/treTotal*100) : 0;
+          // Sempre contar manualmente a partir das colunas de datas para garantir precisão
+          let presCount = 0, treCount = 0;
+          dateCols.forEach(dc => {
+            const val = (cols[dc.idx] || '').toLowerCase().trim();
+            if (val && val !== '' && val !== undefined) treCount++;
+            if (val === 'p') presCount++;
+          });
+
+          // Preferir colunas de estatísticas se disponíveis e válidas
+          if (presTotal > 0 && treTotal > 0) {
+            // usar os valores das colunas de stats
+          } else {
+            presTotal = presCount;
+            treTotal = treCount;
           }
 
           const id = pi + Date.now();
