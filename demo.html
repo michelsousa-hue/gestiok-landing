@@ -417,120 +417,118 @@
     const reader = new FileReader();
     reader.onload = e => {
       const raw = e.target.result;
-      const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
 
-      // Detectar formato: assiduidade (datas nas colunas) ou simples (nome,posicao,escalao)
-      const firstLine = lines[0].toLowerCase();
-      const isAssiduidade = firstLine.includes('/') || firstLine.includes('out') || firstLine.includes('jan') || firstLine.includes('fev');
+      // Parser CSV robusto com suporte a campos entre aspas
+      function parseCSV(text) {
+        const rows = [];
+        const lines = text.split(/\r?\n/);
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const row = [];
+          let cur = '', inQ = false;
+          for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') { inQ = !inQ; }
+            else if (line[i] === ',' && !inQ) { row.push(cur.trim()); cur = ''; }
+            else { cur += line[i]; }
+          }
+          row.push(cur.trim());
+          rows.push(row);
+        }
+        return rows;
+      }
 
+      const rows = parseCSV(raw);
+      if (rows.length < 2) { showToast('CSV inválido ou vazio!'); return; }
+
+      const header = rows[0];
       players = [];
       sessions = [];
 
-      if (isAssiduidade) {
-        // Formato assiduidade: primeira coluna=nome, restantes=datas ou estatísticas
-        // Parser que respeita campos entre aspas (ex: "52,17%")
-        function parseCSVLine(line) {
-          const result = [];
-          let cur = '', inQuotes = false;
-          for (let i = 0; i < line.length; i++) {
-            if (line[i] === '"') { inQuotes = !inQuotes; }
-            else if (line[i] === ',' && !inQuotes) { result.push(cur.trim()); cur = ''; }
-            else { cur += line[i]; }
-          }
-          result.push(cur.trim());
-          return result;
-        }
-        const header = parseCSVLine(lines[0]);
-        
-        // Encontrar colunas de estatísticas no final
-        const totalPresIdx = header.findIndex(h => h.toLowerCase().includes('total pres'));
-        const totalTreIdx = header.findIndex(h => h.toLowerCase().includes('total tre'));
-        const pctIdx = header.findIndex(h => h.toLowerCase().includes('%'));
+      // Detectar tipo de CSV
+      const isAssiduidade = header.some(h => h.includes('/') || /jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i.test(h));
 
-        // Linhas de dados (ignorar linhas de totais no final)
-        const skipWords = ['presenças','falta','total','média','lesão','ausência'];
-        const dataLines = lines.slice(1).filter(l => {
-          const first = l.split(',')[0].toLowerCase().trim();
+      if (isAssiduidade) {
+        // Encontrar índices das colunas de estatísticas
+        const totalPresIdx = header.findIndex(h => h.toLowerCase().includes('total pres'));
+        const totalTreIdx  = header.findIndex(h => h.toLowerCase().includes('total tre'));
+
+        // Identificar colunas de datas
+        const dateCols = header.map((h, i) => ({ i, h })).filter(({i, h}) =>
+          i > 0 && (h.includes('/') || /jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i.test(h))
+        );
+
+        // Palavras a ignorar nas linhas (totais, médias, etc.)
+        const skipWords = ['presenças','falta','total','média','lesão','ausência','média'];
+
+        const dataRows = rows.slice(1).filter(r => {
+          const first = (r[0] || '').toLowerCase().trim();
           return first && !skipWords.some(w => first.includes(w));
         });
 
-        // Extrair datas válidas (colunas com formato data ou mês abreviado)
-        const dateCols = [];
-        header.forEach((h, i) => {
-          if (i === 0) return;
-          const clean = h.trim();
-          if (clean.match(/\d{1,2}\/\d{2}/) || clean.match(/\d{2}-\w+/) || clean.match(/jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/i)) {
-            dateCols.push({ idx: i, date: clean });
-          }
-        });
-
-        // Construir sessões a partir das datas
+        // Construir mapa de sessões
         const sessionMap = {};
-        dateCols.forEach(dc => { sessionMap[dc.idx] = { date: dc.date, presencas: {} }; });
+        dateCols.forEach(({i, h}) => { sessionMap[i] = { date: h, presencas: {} }; });
 
-        dataLines.forEach((line, pi) => {
-          const cols = parseCSVLine(line).map(c => c.replace(/"/g,''));
-          const nome = cols[0];
+        dataRows.forEach((row, pi) => {
+          const nome = (row[0] || '').trim();
           if (!nome) return;
 
-          let presTotal = 0, treTotal = 0, pct = 0;
+          // Ler stats das colunas dedicadas
+          let presTotal = totalPresIdx > 0 ? parseInt(row[totalPresIdx]) || 0 : 0;
+          let treTotal  = totalTreIdx  > 0 ? parseInt(row[totalTreIdx])  || 0 : 0;
 
-          // Usar colunas de estatísticas se disponíveis
-          if (totalPresIdx > 0 && cols[totalPresIdx]) presTotal = parseInt(cols[totalPresIdx]) || 0;
-          if (totalTreIdx > 0 && cols[totalTreIdx]) treTotal = parseInt(cols[totalTreIdx]) || 0;
-
-          // Sempre contar manualmente a partir das colunas de datas para garantir precisão
-          let presCount = 0, treCount = 0;
-          dateCols.forEach(dc => {
-            const val = (cols[dc.idx] || '').toLowerCase().trim();
-            if (val && val !== '' && val !== undefined) treCount++;
-            if (val === 'p') presCount++;
-          });
-
-          // Preferir colunas de estatísticas se disponíveis e válidas
-          if (presTotal > 0 && treTotal > 0) {
-            // usar os valores das colunas de stats
-          } else {
-            presTotal = presCount;
-            treTotal = treCount;
+          // Se não tiver, contar manualmente
+          if (!presTotal || !treTotal) {
+            dateCols.forEach(({i}) => {
+              const v = (row[i] || '').toLowerCase().trim();
+              if (v) treTotal++;
+              if (v === 'p') presTotal++;
+            });
           }
 
-          const id = pi + Date.now();
+          const id = Date.now() + pi * 1000 + Math.random();
           players.push({ id, nome, posicao: 'Avançado', escalao: 'Sénior', presencas: presTotal, sessoes: treTotal });
 
-          // Registar nas sessões
-          dateCols.forEach(dc => {
-            const val = (cols[dc.idx] || '').toLowerCase().trim();
-            if (val) sessionMap[dc.idx].presencas[id] = val.startsWith('p') ? 'P' : val === 'fca' ? 'FCA' : val === 'fsa' || val === 'fcsa' ? 'FSA' : val === 'l' ? 'FSA' : null;
+          // Registar em cada sessão
+          dateCols.forEach(({i}) => {
+            const v = (row[i] || '').toLowerCase().trim();
+            if (!v) return;
+            let estado = null;
+            if (v === 'p') estado = 'P';
+            else if (v === 'fca') estado = 'FCA';
+            else if (v === 'fsa' || v === 'fcsa') estado = 'FSA';
+            else if (v === 'l') estado = 'FSA';
+            sessionMap[i].presencas[id] = estado;
           });
         });
 
-        // Converter sessionMap em sessions
+        // Converter sessionMap em sessions (só sessões com pelo menos 1 registo)
         Object.values(sessionMap).forEach(s => {
-          if (Object.values(s.presencas).some(v => v)) {
+          if (Object.values(s.presencas).some(v => v !== null)) {
             sessions.push({ date: s.date, presencas: s.presencas });
           }
         });
 
         const drop = document.getElementById('csv-drop');
-        drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text"><strong>${players.length} jogadores importados!</strong><br/><span style="font-size:0.8rem;color:var(--text-dim)">${sessions.length} sessões carregadas da época</span></div>`;
+        drop.innerHTML = `<div class="csv-drop-icon">✅</div><div class="csv-drop-text">
+          <strong>${players.length} jogadores importados!</strong><br/>
+          <span style="font-size:0.8rem;color:var(--text-dim)">${sessions.length} sessões carregadas da época</span>
+        </div>`;
         showToast(`${players.length} jogadores e ${sessions.length} sessões importados!`);
 
       } else {
         // Formato simples: nome, posicao, escalao
-        const header = lines[0].toLowerCase().split(',').map(h => h.trim());
-        const nomeIdx = header.findIndex(h => h.includes('nome'));
-        const posIdx = header.findIndex(h => h.includes('pos'));
-        const escIdx = header.findIndex(h => h.includes('esc') || h.includes('cat'));
-        lines.slice(1).forEach((line, i) => {
-          const cols = line.split(',').map(c => c.trim().replace(/"/g,''));
-          const nome = nomeIdx >= 0 ? cols[nomeIdx] : cols[0];
+        const nomeIdx = header.findIndex(h => h.toLowerCase().includes('nome'));
+        const posIdx  = header.findIndex(h => h.toLowerCase().includes('pos'));
+        const escIdx  = header.findIndex(h => h.toLowerCase().includes('esc') || h.toLowerCase().includes('cat'));
+        rows.slice(1).forEach((row, i) => {
+          const nome = (nomeIdx >= 0 ? row[nomeIdx] : row[0] || '').trim();
           if (!nome) return;
           players.push({
-            id: i + Date.now(),
+            id: Date.now() + i,
             nome,
-            posicao: posIdx >= 0 ? cols[posIdx] : 'Avançado',
-            escalao: escIdx >= 0 ? cols[escIdx] : 'Sénior',
+            posicao: posIdx >= 0 ? row[posIdx] : 'Avançado',
+            escalao: escIdx >= 0 ? row[escIdx] : 'Sénior',
             presencas: 0, sessoes: 0
           });
         });
